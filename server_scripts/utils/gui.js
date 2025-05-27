@@ -1,5 +1,13 @@
 // priority: 10
 
+// IN ORDER TO AVOID ABUSE, WHEN OPENING INVENTORIES, PLAYER INV IS SAVED AND RESUMED WHEN NECESSARY
+/** @type {Map<string, number} */
+let RecentlyHurtPlayers = new Map()
+
+let InventoryCache = new Map()
+
+const GUI_HURT_COOLDOWN = 5 * 1000;
+
 /**
  * @typedef {Object} MenuButton
  * @property {TextComponent[]} title
@@ -140,6 +148,8 @@ Menu.prototype.Redraw = function () {
  * @param {string|undefined} data
  */
 Menu.prototype.OpenMenu = function (player, page, data) {
+  if(isRecentlyHurt(player)) return;
+
   if (!page && this.pages.length == 0) return;
 
   if (!page) {
@@ -147,11 +157,32 @@ Menu.prototype.OpenMenu = function (player, page, data) {
   }
 
   player.openChestGUI(Text.of(this.config.title), this.config.rows, gui => {
-    gui.playerSlots = this.config.showPlayerInventory || false;
+    gui.playerSlots = false;
+    gui.player.sendInventoryUpdate();
     this.gui = gui;
     this.player = gui.player;
+
+    InventoryCache.set(`${this.player.uuid}`, this.player.inventory)
     this.ShowPage(page, data);
   });
+}
+
+/**
+ * Helper function to check if a player has been recently hurt
+ * @param {$ServerPlayer_} player 
+ * @returns 
+ */
+function isRecentlyHurt(player){
+  let recentlyHurt = RecentlyHurtPlayers.get(`${player.uuid}`);
+  if(recentlyHurt){
+    let hurtAgo = Date.now() - recentlyHurt
+    if(hurtAgo <= GUI_HURT_COOLDOWN){
+      // player.tell(`You were hurt recently. Please wait ${((GUI_HURT_COOLDOWN - hurtAgo) / 1000).toFixed(1)} seconds...`)
+      player.server.runCommandSilent(`title ${player.username} actionbar [{"text":"You were hurt recently. Please wait ${((GUI_HURT_COOLDOWN - hurtAgo) / 1000).toFixed(1)} seconds...", "color":"dark_red"}]`)
+      return true;
+    }
+  }
+  return false;
 }
 
 /**
@@ -164,3 +195,29 @@ Menu.prototype.close = function () {
     print(e)
   }
 }
+
+EntityEvents.beforeHurt((e)=>{
+  let player = e.player;
+  if(!player) return;
+  
+  RecentlyHurtPlayers.set(`${player.uuid}`, Date.now())
+  
+  // There isnt a container thats open
+  if(player.openInventory.containerId == 0) return;
+  console.log(e.damage)
+
+  // If its a ChestGUIMenu
+  if(InventoryCache.get(`${player.uuid}`)){
+    // Add 1 shot protection
+    player.closeMenu()
+    e.cancel();
+  }
+  player.closeMenu()
+})
+
+PlayerEvents.inventoryClosed((e)=>{
+  let cachedInventory = `${InventoryCache.get(e.player.uuid)}`
+  if(!cachedInventory) return;
+
+  InventoryCache.delete(`${e.player.uuid}`)
+})
