@@ -111,6 +111,13 @@ function getTrackableEntities(player) {
     for (const entity of entities) {
       if (entity.hasCustomName() && entity.type == "minecraft:pig") {
         trackableEntities.push(entity);
+        continue;
+      }
+
+      if(entity.player){
+        // Ignore players in ghost mode
+        if(GHOST_USED.get(`${entity.uuid}`)) continue;
+        trackableEntities.push(entity);
       }
     }
 
