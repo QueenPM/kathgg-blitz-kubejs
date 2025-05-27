@@ -86,10 +86,34 @@ function getGuildData(guild){
  * @returns {null|GuildInformation}
  */
 function getPlayerGuild(uuid){
-  let guildOptional = $GuildAPI.getPlayerGuild(uuid);
-  if(!guildOptional || !guildOptional.isPresent()) return null;
+  try{
+    let guildOptional = $GuildAPI.getPlayerGuild(uuid);
+    if(!guildOptional || !guildOptional.isPresent()) return null;
+  
+    return getGuildData(guildOptional.get());
+  }catch(e) {
+    return null;
+  }
+}
 
-  return getGuildData(guildOptional.get());
+/**
+ * Helper function to check if both players are in the same guild or are allies
+ * @param {$ServerPlayer_} playerOne 
+ * @param {$ServerPlayer_} playerTwo 
+ */
+function arePlayersAllies(playerOne, playerTwo){
+  const playerOneGuild = getPlayerGuild(playerOne);
+  if(!playerOneGuild) return false;
+  for(const member of playerOneGuild.members){
+    if(member.UUID == playerOne.uuid.toString()) continue;
+    if(member.UUID == playerTwo.uuid.toString()){
+      return true;
+    }
+  }
+
+  // TODO check allies
+
+  return false;
 }
 
 /**
