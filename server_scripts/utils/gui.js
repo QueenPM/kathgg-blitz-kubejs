@@ -1,4 +1,3 @@
-
 // priority: 10
 
 /**
@@ -183,9 +182,9 @@ Menu.prototype.OpenMenu = function (player, page, data) {
   }
 
   player.openChestGUI(Text.of(this.config.title), this.config.rows, gui => {
+    gui.playerSlots = this.config.showPlayerInventory;
     this.gui = gui;
     this.player = player;
-    gui.playerSlots = false;
     this.ShowPage(page, data);
   });
 }
