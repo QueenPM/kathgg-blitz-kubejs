@@ -1,41 +1,6 @@
 // priority: 10
 
 /**
- * @typedef {Object} SortingOption
- * @property {string} display : Display name of the sorting option
- * @property {(a: KDRPlayer, b: KDRPlayer) => number} sort : Sorting function
- */
-
-/**
- * @type {SortingOption[]}
- */
-const COMBAT_LEADERBOARD_SORTING_OPTIONS = [
-  { display: "KDR", sort: (a, b) => b.kdr - a.kdr },
-  { display: "Kills", sort: (a, b) => b.kills - a.kills },
-  { display: "Deaths", sort: (a, b) => b.player_deaths - a.player_deaths },
-  { display: "Longest Kill", sort: (a, b) => getLongestKill(b) - getLongestKill(a) },
-  { display: "Killstreak", sort: (a, b) => b.killstreak - a.killstreak },
-  { display: "Highest Killstreak", sort: (a, b) => b.highest_killstreak - a.highest_killstreak }
-];
-const MAX_COLUMNS = 9;
-
-ServerEvents.commandRegistry(event => {
-  const { commands: Commands, arguments: Arguments } = event
-
-  event.register(Commands.literal('cs')
-    .executes(c => {
-      KDAMenu.OpenMenu(c.source.player, "main", { sort: 0 });
-      return 1;
-    }))
-
-  event.register(Commands.literal('combatstats')
-    .executes(c => {
-      KDAMenu.OpenMenu(c.source.player, "main", { sort: 0 });
-      return 1;
-    }))
-})
-
-/**
  * @typedef {Object} MenuButton
  * @property {TextComponent[]} title
  * @property {TextComponent[][]} description
@@ -182,7 +147,7 @@ Menu.prototype.OpenMenu = function (player, page, data) {
   }
 
   player.openChestGUI(Text.of(this.config.title), this.config.rows, gui => {
-    gui.playerSlots = this.config.showPlayerInventory;
+    gui.playerSlots = this.config.showPlayerInventory || true;
     this.gui = gui;
     this.player = player;
     this.ShowPage(page, data);
