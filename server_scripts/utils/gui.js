@@ -204,13 +204,18 @@ EntityEvents.beforeHurt((e)=>{
   
   // There isnt a container thats open
   if(player.openInventory.containerId == 0) return;
-  console.log(e.damage)
 
   // If its a ChestGUIMenu
   if(InventoryCache.get(`${player.uuid}`)){
     // Add 1 shot protection
     player.closeMenu()
-    e.cancel();
+
+    // Check if the damage will potentially kill the player
+    if(player.health - e.damage <= 0.5){
+      player.setHealth(((player.health - e.damage)*-1)+0.5)
+      player.playNotifySound("item.totem.use", "ambient", 1, 1)
+      e.cancel();
+    }
   }
   player.closeMenu()
 })
