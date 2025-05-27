@@ -26,6 +26,25 @@ function capitalizeFirstLetters(string) {
 }
 
 /**
+ * Helper function to convert milliseconds to a human readable time format
+ * @param ms
+ * @returns
+ */
+function timeToString(ms) {
+  let seconds = Math.floor(ms / 1000);
+  let minutes = Math.floor(seconds / 60);
+  let hours = Math.floor(minutes / 60);
+  let days = Math.floor(hours / 24);
+  let text = "";
+  if (days > 0) text += `${days}d `;
+  if (hours > 0) text += `${hours % 24}h `;
+  if (minutes > 0) text += `${minutes % 60}m `;
+  
+  text += `${seconds % 60}s`;
+  return text;
+}
+
+/**
  * Returns a string with the relative time to timestamp.
  * @param {number} timestamp 
  * @returns {string}
