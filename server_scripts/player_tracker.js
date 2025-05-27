@@ -18,12 +18,16 @@ const MAX_DISTANCE = 100;
 const REVEAL_DISTANCE = 30;
 
 /**
+ * Keeps track of tracker cooldowns. 
+ * @type {Map<string, number>} */
+let TrackerCooldownCache = new Map();
+
+/**
  * @typedef TrackerData
  * @property {boolean} player_tracker - If the item is a player tracker
  * @property {boolean} autoTracker - If the tracker is set to auto track
  * @property {boolean} tracked - If the tracker is currently tracking a player
  * @property {UUID} target - The target entity to track
- * @property {string} cooldown - The cooldown for the tracker (in seconds). 0 means ready to use, otherwise its a timestamp to when it can be used again
  * @property {boolean} broken - If the tracker is broken. This is to prevent multiple trackers from being used at the same time
  */
 const DEFAULT_CUSTOM_DATA = {
@@ -31,7 +35,6 @@ const DEFAULT_CUSTOM_DATA = {
   autoTracker: true,
   tracked: false,
   target: "null",
-  cooldown: "0",
   broken: false
 }
 
@@ -140,14 +143,32 @@ function isItemTracker(tracker) {
 }
 
 /**
+ * Gets the player's tracker from all their possible inventory slots. Returns null if they dont have a tracker
+ * @param {$ServerPlayer_} player
+ * @returns {$ItemStack_|null}
+ */
+function getTrackerFromPlayer(player){
+  /** @type {$ItemStack_} */
+  let tracker = null;
+  for (let item of player.inventory.items) {
+    if (isItemTracker(item)) {
+      tracker = item;
+      break;
+    }
+  }
+  return tracker;
+}
+
+/**
  * Updates the currently held tracker for the player
  * @param {$Player_} player
  * @param {$Entity_} entity
- * @param {TrackerData} currentTrackerData
+ * @param {TrackerData} newTrackerData
  */
-function updateTracker(player, entity, currentTrackerData) {
+function updateTracker(player, entity, newTrackerData) {
   let tracker = player.getMainHandItem();
   if (!isItemTracker(tracker)) return;
+
   let position = entity.blockPosition();
   let distance = player.getDistance(position);
 
@@ -178,16 +199,15 @@ function updateTracker(player, entity, currentTrackerData) {
   }
 
   /** @type {TrackerData} */
-  let customData = currentTrackerData
-  customData.target = entity.getStringUuid();
-  customData.tracked = true;
+  newTrackerData.target = entity.getStringUuid();
+  newTrackerData.tracked = true;
   if(!player.isCreative()){
-    customData.cooldown = (Date.now() + COOLDOWN * 1000).toString();
+    TrackerCooldownCache.set(`${player.getStringUuid()}`,Date.now() + COOLDOWN * 1000)
   }
 
   let lore = DEFAULT_COMPASS_LORE;
 
-  if (customData.autoTracker == true) {
+  if (newTrackerData.autoTracker == true) {
     lore[0] = [
       { text: "Mode: ", italic: false },
       { text: "Auto Tracking", color: "green", italic: false }
@@ -209,7 +229,7 @@ function updateTracker(player, entity, currentTrackerData) {
   }
 
   let displayComponent = textDisplayComponent(textArray, lore);
-  let newCompassString = `minecraft:compass[${displayComponent},lodestone_tracker={target:{dimension:"${entity.level.dimension}",pos:[I;${position.x},${position.y},${position.z}]}, tracked:false},custom_data=${customData}]`;
+  let newCompassString = `minecraft:compass[${displayComponent},lodestone_tracker={target:{dimension:"${entity.level.dimension}",pos:[I;${position.x},${position.y},${position.z}]}, tracked:false},custom_data=${newTrackerData}]`;
   player.server.runCommandSilent(`item replace entity ${player.username} weapon.mainhand with ${newCompassString}`);
   player.playNotifySound("minecraft:block.note_block.bell", "master", 1, 1);
 }
@@ -255,17 +275,14 @@ function resetTracker(player, data) {
 /**
  * Returns true if the tracker is on cooldown
  * @param {$Player_} player
- * @param {TrackerData} customData
  * @returns {boolean}
 */
-function isTrackerOnCooldown(player, customData){
-  let cooldown = parseInt(customData.cooldown.getAsString());
-  if(isNaN(cooldown)) return false;
-  if(cooldown == 0 || cooldown <= Date.now()){
-    return false;
-  }
+function isTrackerOnCooldown(player){
+  if(player.isCreative()) return false;
+  let cooldownPlayer = TrackerCooldownCache.get(`${player.uuid.toString()}`);
+  if(!cooldownPlayer) return false;
 
-  let left = cooldown - Date.now();
+  let left = cooldownPlayer - Date.now();
   let percentage = left / (COOLDOWN * 1000);
   let barLength = 25;
   let barIncomplete = barLength - Math.floor(percentage * barLength);
@@ -289,11 +306,7 @@ function isTrackerOnCooldown(player, customData){
  * @returns {boolean}
 */
 function isTrackerBroken(player, customData){
-  if(customData.broken == false){
-    return false;
-  }
-
-  // Check if they still have nother tracker in their inventory
+  // Get all trackers in inventory
   let trackers = 0;
   let brokenTrackers = 0;
   for(const item of player.inventory.items){
@@ -320,13 +333,17 @@ function isTrackerBroken(player, customData){
     return false;
   }
 
-  /** @type {TextComponent[]} */
-  let text = [
-    {text: `Cosmic interference has broken this device.`, color: "dark_purple", italic:false}
-  ]
-  let command = `title ${player.username} actionbar [${JSON.stringify(text)}]`
-  player.server.runCommandSilent(command);
-  return true;
+  /** @type {TrackerData} */
+  let heldTracker = player.getItemInHand().getCustomData()
+  if(heldTracker.broken){
+    /** @type {TextComponent[]} */
+    let text = [
+      {text: `Cosmic interference has broken this device.`, color: "dark_purple", italic:false}
+    ]
+    let command = `title ${player.username} actionbar [${JSON.stringify(text)}]`
+    player.server.runCommandSilent(command);
+    return true;
+  }
 }
 
 /**
@@ -344,9 +361,9 @@ ItemEvents.rightClicked(e => {
   /** @type {TrackerData} */
   let customData = e.item.getCustomData();
 
-  // if(isTrackerBroken(player, customData) == true) return;
-  if(isTrackerOnCooldown(player, customData) == true) return;
-
+  // Unused - Would check if a Tracker is broken to avoid using multiple trackers. Instead, cooldown has been made global amongst all trackers per player
+  // if(isTrackerBroken(player, customData)) return;
+  
   if (player.crouching) {
     /** @type {Array<PlayerInventory>} */
     let data = [];
@@ -361,7 +378,8 @@ ItemEvents.rightClicked(e => {
     TrackerMenu.OpenMenu(player, "main", data);
     return;
   }
-
+  
+  if(isTrackerOnCooldown(player)) return;
   // Update the current tracker
 
   /** @type {$Entity_|null} */
@@ -398,58 +416,6 @@ ItemEvents.rightClicked(e => {
 
   updateTracker(player, trackingEntity, customData);
 })
-
-// /** @type {string[]} */
-// let breakingCurrentTrackers = [];
-
-// PlayerEvents.inventoryChanged(e => {
-//   let newItem = e.getItem();
-//   if(!isItemTracker(newItem)) return;
-//   // If its already broken, then dont do anything
-//   if(newItem.getCustomData().broken == true) return;
-
-//   // TODO is the issue here?
-//   for(const breakingTrackers of breakingCurrentTrackers){
-//     if(breakingTrackers === `${e.player.getStringUuid()}:${e.slot}`){
-//       print("Tracker is currently breaking")
-//       e.exit();
-//       return;
-//     }
-//   }
-
-//   let trackers = 0;
-//   let brokenTrackers = 0;
-//   for(const item of e.player.inventory.items){
-//     if(isItemTracker(item)){
-//       trackers++;
-//       let customData = item.getCustomData();
-//       if(customData && customData.broken == true){
-//         brokenTrackers++;
-//       }
-//       continue;
-//     }
-//   }
-
-//   // If there are more than 1 trackers and at least 1 is working, then break the current one
-//   if(trackers > 1 && trackers - brokenTrackers > 1){
-//     print("Breaking new tracker")
-
-//     // Add the tracker to the breaking list
-//     breakingCurrentTrackers.push(`${e.player.getStringUuid()}:${e.slot}`);
-
-//     let customData = newItem.getCustomData();
-//     customData.broken = true;
-//     newItem.setLore([Text.of("Cosmic interference has broken this device.").darkPurple()])
-//     newItem.setCustomData(customData);
-//     newItem.setItemName(Text.of("Broken Tracker"))
-
-//     // Remove the breaking process
-//     e.server.scheduleInTicks(20, () => {
-//       breakingCurrentTrackers = breakingCurrentTrackers.filter(tracker => tracker !== `${e.player.getStringUuid()}:${e.slot}`);
-//       print("Removed tracker from breaking list")
-//     });
-//   }
-// })
 
 /**
  * Returns in string form the minecraft:compass item with the default tracker data
@@ -525,7 +491,7 @@ let TrackerMenu = new Menu({
       if (row >= max_rows) {
         break;
       }
-      let { unobfuscatedString, obfuscatedString } = obfuscateUsername(entity.username, menu.player.getDistance(entity.position()))
+      let { unobfuscatedString, obfuscatedString } = obfuscateUsername(entity.player ? entity.username : entity.name.string, menu.player.getDistance(entity.position()))
       menu.gui.slot(column, 0, slot => {
         slot.item = createMenuButton({
           title: [
@@ -538,6 +504,9 @@ let TrackerMenu = new Menu({
             ],
             [
               { text: `§7Distance: §f${entity.position().distanceTo(menu.player.position()).toFixed(2)} blocks` },
+            ],
+            [
+              { text: `Click to start tracking` },
             ]
           ],
           itemID: "minecraft:player_head",
@@ -549,22 +518,14 @@ let TrackerMenu = new Menu({
           menu.close();
           // TODO temporary fix until I can figure out how to keep player inventory or access the inventory thats being given back on close
           menu.player.server.scheduleInTicks(10, () => {
+            if(isTrackerOnCooldown(menu.player)) return;
             updateTracker(menu.player, entity, setTrackerMode(menu.player, entity));
           });
         }
       })
     }
 
-    /** @type {$ItemStack_} */
-    let tracker = null;
-    for (let i = 0; i < playerInventory.length; i++) {
-      let slot = playerInventory[i];
-      let item = slot.item;
-      if (isItemTracker(item)) {
-        tracker = item;
-        break;
-      }
-    }
+    let tracker = getTrackerFromPlayer(menu.player)
     if (tracker) {
       let customData = tracker.getCustomData();
       if(customData.autoTracker == false){
@@ -588,6 +549,7 @@ let TrackerMenu = new Menu({
           slot.leftClicked = e => {
             menu.close();
             menu.player.server.scheduleInTicks(10, () => {
+              if(isTrackerOnCooldown(menu.player)) return;
               updateTracker(menu.player, entities[0], setTrackerMode(menu.player, null));
             });
           }
