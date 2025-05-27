@@ -13,6 +13,11 @@ const FEATURE_COMBAT_STATS = true;
 const FEATURE_KITS = false;
 
 /**
+ * Credits
+ */
+const FEATURE_CREDITS = true;
+
+/**
  * Player Tracker
  */
 const FEATURE_TRACKER = true;
