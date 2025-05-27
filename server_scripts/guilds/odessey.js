@@ -1,70 +1,192 @@
-// const $GuildAPI = Java.loadClass(
-//   "earth.terrarium.odyssey_allies.api.teams.guild.GuildApi"
-// ).API;
+// priority: 0
 
-// const $ClaimsManager = Java.loadClass(
-//   "earth.terrarium.cadmus.api.claims.ClaimApi"
-// ).API;
+const $GuildAPI = Java.loadClass(
+  "earth.terrarium.odyssey_allies.api.teams.guild.GuildApi"
+).API;
 
-// PlayerEvents.chat((event) => {
-//   let chat = event.getMessage();
-//   let player = event.getPlayer();
+const $ClaimsManager = Java.loadClass(
+  "earth.terrarium.cadmus.api.claims.ClaimApi"
+).API;
 
-//   let data = getPlayerData(player.uuid);
-//   let cs = getCombatStats(data);
+/**
+ * @typedef GuildPermissions
+ * @property {boolean} managePermissions
+ * @property {boolean} operator
+ * @property {boolean} teleport
+ * @property {boolean} manageSettings
+ * @property {boolean} manageMembers
+ */
 
-//   // Create a components array
-//   let texts = [];
+/**
+ * @typedef GuildMember
+ * @property {string} UUID
+ * @property {string} name
+ * @property {number} kills
+ * @property {number} deaths
+ * @property {boolean} isOwner
+ * @property {GuildPermissions} permissions
+ * @property {string} status
+ */
 
-//   // Get guild
-//   let guildOpt = $GuildAPI.getPlayerGuild(player);
-//   if (guildOpt && guildOpt.isPresent()) {
-//     const guild = guildOpt.get();
+/**
+ * @typedef GuildInformation
+ * @property {string} UUID
+ * @property {string} name
+ * @property {string} color
+ * @property {string} motd
+ * @property {GuildMember} owner
+ * @property {GuildMember[]} members
+ */
 
-//     const guildName = guild.settings().displayName;
+/**
+ * Helper function to get Guild Data in a clean format with JSDocs
+ * @returns {GuildInformation}
+*/ 
+function getGuildData(guild){
+  let settings = guild.settings();
 
-//     const color = guild.color();
+  /** @type {GuildMember[]} */
+  let members = [];
 
-//     texts.push({
-//       text: `[ `,
-//       color: "white",
-//     });
+  let iterator = guild.members().entrySet().iterator();
+  while (iterator.hasNext()) {
+    let entry = iterator.next();
 
-//     texts.push({
-//       text: `${guildName}`,
-//       color: color.getTextColor().toString(),
-//       // hoverEvent: {
-//       //   action: "show_item",
-//       //   contents: {
-//       //     id: "minecraft:stick",
-//       //     count: 1,
-//       //     components: {
-//       //       custom_name: `{"text":"${guildName}"}`
-//       //     }
-//       //   },
-//       // },
-//     });
+    let playerId = entry.getKey();
+    let member = entry.getValue();
 
-//     texts.push({
-//       text: ` ] `,
-//       color: "white",
-//     });
-//   }
+    members.push({
+      UUID: playerId.toString(),
+      name: getPlayerName(playerId),
+      kills: 0,
+      deaths: 0,
+      isOwner: member.isOwner(),
+      permissions:member.permissions(),
+      status: member.status().getDisplayName()
+    })
+  }
 
-//   // Add player name
-//   texts.push({
-//     text: `${player.username}: `,
-//     color: "white",
-//   });
+  
+  /** @type {GuildInformation} */
+  let guildInformation = {
+    UUID: guild.id.toString(),
+    name: settings.displayName.toString(),
+    color: guild.color().getTextColor().toString(),
+    owner: members.find(m => m.isOwner),
+    motd: settings.motd.toString(),
+    members: members
+  }
+  
+  return guildInformation;
+}
 
-//   // Add message
-//   texts.push({
-//     text: chat,
-//     color: "white",
-//   });
+/**
+ * Gets a Player's Odessy Guild
+ * @param {string} uuid
+ * @returns {null|GuildInformation}
+ */
+function getPlayerGuild(uuid){
+  let guildOptional = $GuildAPI.getPlayerGuild(uuid);
+  if(!guildOptional || !guildOptional.isPresent()) return null;
 
-//   // Convert to JSON for tellraw
-//   let tellraw = `tellraw @a ${JSON.stringify(texts)}`;
-//   event.server.runCommandSilent(tellraw);
-//   event.cancel();
-// });
+  return getGuildData(guildOptional.get());
+}
+
+/**
+ * Helper function to construct guild information in item form
+ * @param {GuildInformation} guild
+ * @param {string|undefined} playerId?
+ */
+function getGuildItemComponent(guild, playerId){
+  /** @type {TextComponent} */
+  let name = {text:`${guild.name}`, italic: false, color: guild.color};
+
+  /** @type {TextComponent[]} */
+  let lore = [
+    {text:"Owner: ", italic: false, color: "yellow", extra:[{text: `${guild.owner.name}`, color: "white"}]},
+  ]
+  
+  if(playerId){
+    let gPlayer = guild.members.find(m => m.UUID == playerId)
+    if(gPlayer){
+      lore.push({text:"Rank: ", italic: false, color: "yellow", extra:[{text: `${gPlayer.status.string}`}]})
+    }
+  }
+
+  lore.push({text:"Members: ", italic: false, color: "gray", extra:[{text: `${guild.members.length}`, color: "white"}]})
+
+  return {
+    custom_name: JSON.stringify(name),
+    lore: lore.map(i => JSON.stringify(i))
+  }
+}
+
+/**
+ * Helper function to use the Player's name with Guild Information to be used in Chat
+ * @param {$LivingEntity_} player
+ */
+function getPlayerChatName(player) {
+  // Check for entity
+  if(!player.player) return { text: player.name.string}
+  
+  let guild = getPlayerGuild(player);
+  if(!guild) return { text: player.username }
+  return {
+    text: player.username,
+    color: guild.color,
+    hoverEvent: {
+        action: "show_item",
+        contents: {
+          id: "minecraft:stick",
+          count: 1,
+          components: getGuildItemComponent(guild, player.uuid.toString())
+      },
+    }
+  }
+}
+
+PlayerEvents.chat((event) => {
+  let chat = event.getMessage();
+  let player = event.getPlayer();
+
+  // let data = getPlayerData(player.uuid);
+  // let cs = getCombatStats(data);
+
+  // Create a components array
+  let texts = [];
+
+  // Get guild
+  let guild = getPlayerGuild(player);
+
+  if (guild) {
+    texts.push({
+      text: `${guild.name} `,
+      color: guild.color,
+      hoverEvent: {
+        action: "show_item",
+        contents: {
+          id: "minecraft:stick",
+          count: 1,
+          components: getGuildItemComponent(guild, player.uuid.toString())
+        },
+      },
+    });
+  }
+
+  // Add player name
+  texts.push({
+    text: `<${player.username}> `,
+    color: "white",
+  });
+
+  // Add message
+  texts.push({
+    text: chat,
+    color: "white",
+  });
+
+  // Convert to JSON for tellraw
+  let tellraw = `tellraw @a {"text": "", "extra": ${JSON.stringify(texts)}}`;
+  event.server.runCommandSilent(tellraw);
+  event.cancel();
+});

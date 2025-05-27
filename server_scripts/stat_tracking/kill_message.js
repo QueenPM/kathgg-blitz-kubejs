@@ -2,7 +2,7 @@
 
 const MIN_LENGTH = 0;
 
-const ONLY_PLAYER_KILLS = true;
+const ONLY_PLAYER_KILLS = false;
 
 // Death events during an active arena
 EntityEvents.death((event)=>{
@@ -11,7 +11,6 @@ EntityEvents.death((event)=>{
   let killerPlayer = event.source.player ? event.server.getPlayer(event.source.player) : null;
   // If the killer is not a player, or the killer is the same as the dead player, return
   if(!killerPlayer || event.entity.username === killerPlayer.username) return
-
 
   // Get the dead entity
   let deadPlayer =  event.server.getPlayer(event.entity.username);
@@ -64,7 +63,7 @@ EntityEvents.death((event)=>{
     let item = Item.of(`${killerPlayer.handSlots[0].id}[${displayComponent}]`);
     glyphs = `, {"text": " §8(Spell§8)", "hoverEvent": { "action": "show_item", "contents":${itemToChatComponent(item)}}}`
   }
-  let tellraw = `tellraw @a {"text": "§f${killerPlayer.username} §4has slain", "extra": [{"text": " §f${name} "}, {"text": "§8(§e${distance.toFixed(2)} blocks§8)", "hoverEvent": { "action": "show_item", "contents":${itemComponent}}}${glyphs}]}`
+  let tellraw = `tellraw @a {"text": "", "extra": [${JSON.stringify(getPlayerChatName(killerPlayer))},{"text":" has slain ", "color":"dark_red"}, ${JSON.stringify(getPlayerChatName(deadPlayer || event.entity))}, {"text": " §8(§e${distance.toFixed(2)} blocks§8)", "hoverEvent": { "action": "show_item", "contents":${itemComponent}}}${glyphs}]}`
   event.server.runCommandSilent(tellraw)
   if(deadPlayer) deadPlayer.inventory.dropAll();
   event.cancel();
