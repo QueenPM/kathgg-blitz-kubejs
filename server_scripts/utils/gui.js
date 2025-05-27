@@ -147,9 +147,9 @@ Menu.prototype.OpenMenu = function (player, page, data) {
   }
 
   player.openChestGUI(Text.of(this.config.title), this.config.rows, gui => {
-    gui.playerSlots = this.config.showPlayerInventory || true;
+    gui.playerSlots = this.config.showPlayerInventory || false;
     this.gui = gui;
-    this.player = player;
+    this.player = gui.player;
     this.ShowPage(page, data);
   });
 }
