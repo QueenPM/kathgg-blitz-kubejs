@@ -212,12 +212,13 @@ EntityEvents.beforeHurt((e)=>{
 
     // Check if the damage will potentially kill the player
     if(player.health - e.damage <= 0.5){
-      player.setHealth(((player.health - e.damage)*-1)+0.5)
+      player.setHealth(0.5)
       player.playNotifySound("item.totem.use", "ambient", 1, 1)
-      e.cancel();
+      e.cancel()
     }
+  }else{
+    player.closeMenu()
   }
-  player.closeMenu()
 })
 
 PlayerEvents.inventoryClosed((e)=>{
