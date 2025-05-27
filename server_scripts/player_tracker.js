@@ -10,17 +10,37 @@ let $Inventory = Java.loadClass("net.minecraft.world.entity.player.Inventory");
 
 let $Entity = Java.loadClass("net.minecraft.world.entity.Entity");
 
+// Tracker Config
 // Cooldown in seconds
-const COOLDOWN = 30;
+const TRACKER_COOLDOWN = 30;
 // The distance at which start revealing the player's name.
 const MAX_DISTANCE = 100;
 // The distance at which the player's name will be fully revealed.
 const REVEAL_DISTANCE = 30;
 
+// Ghost Mode Config
+// Cooldown in seconds
+const GHOST_COOLDOWN = 60 * 30;
+// Duration in seconds
+const GHOST_DURATION = 60 * 5;
+// Cost in Credits (if enabled)
+const GHOST_COST = 50;
+
 /**
  * Keeps track of tracker cooldowns.
  * @type {Map<string, number>} */
 let TrackerCooldownCache = new Map();
+
+/**
+ * @type {Map<string, number>}
+ */
+let GHOST_USED = new Map();
+
+/**
+ * @typedef TrackerUpgrades
+ * @property {integer} ghost
+ * @property {integer} cooldown_reduction
+ */
 
 /**
  * @typedef TrackerData
@@ -29,6 +49,7 @@ let TrackerCooldownCache = new Map();
  * @property {boolean} tracked - If the tracker is currently tracking a player
  * @property {UUID} target - The target entity to track
  * @property {boolean} broken - If the tracker is broken. This is to prevent multiple trackers from being used at the same time
+ * @property {TrackerUpgrades} upgrades - Tracker Upgrades
  */
 const DEFAULT_CUSTOM_DATA = {
   player_tracker: true,
@@ -36,6 +57,10 @@ const DEFAULT_CUSTOM_DATA = {
   tracked: false,
   target: "null",
   broken: false,
+  upgrades: {
+    ghost: 0,
+    cooldown_reduction: 0,
+  },
 };
 
 /** @type {TextComponent[][]} */
@@ -179,7 +204,11 @@ function getTrackerFromPlayer(player) {
  * @param {number} trackerSlotInt
  */
 function updateTracker(player, entity, newTrackerData, trackerSlotInt) {
-  if(!trackerSlotInt) return;
+  if (!trackerSlotInt) return;
+  if(GHOST_USED.get(`${entity.uuid}`)){
+    player.server.runCommandSilent(`tellraw ${player.username} [{"text":"You cannot track ${entity.username} because they are Ghosted", "color":"gray"}]`)
+    return;
+  }
   let position = entity.blockPosition();
   let distance = player.getDistance(position);
 
@@ -220,7 +249,7 @@ function updateTracker(player, entity, newTrackerData, trackerSlotInt) {
   if (!player.isCreative()) {
     TrackerCooldownCache.set(
       `${player.getStringUuid()}`,
-      Date.now() + COOLDOWN * 1000
+      Date.now() + TRACKER_COOLDOWN * 1000
     );
   }
 
@@ -311,7 +340,7 @@ function isTrackerOnCooldown(player) {
   if (!cooldownPlayer) return false;
 
   let left = cooldownPlayer - Date.now();
-  let percentage = left / (COOLDOWN * 1000);
+  let percentage = left / (TRACKER_COOLDOWN * 1000);
   let barLength = 25;
   let barIncomplete = barLength - Math.floor(percentage * barLength);
 
@@ -524,6 +553,94 @@ function coloredDimension(dimension) {
   }
 }
 
+// Ghost
+/**
+ * Activates Ghost Mode for a player
+ * @param {$ServerPlayer_} player
+ */
+function activateGhost(player) {
+  // Check if the player can use ghost
+  let ghostLastUsed = GHOST_USED.get(`${player.uuid}`);
+
+  if (ghostLastUsed && Date.now() - ghostLastUsed <= GHOST_COOLDOWN * 1000) {
+    let endsAt = ghostLastUsed + GHOST_COOLDOWN * 1000;
+    player.server.runCommandSilent(
+      `tellraw ${
+        player.username
+      } [{"text":"Ghost is on cooldown for ${timeToString(
+        endsAt - Date.now()
+      )}", "color":"dark_red"}]`
+    );
+    return;
+  }
+
+  if (FEATURE_CREDITS) {
+    let data = getPlayerData(player.uuid);
+    if (data && hasCredits(player, GHOST_COST)) {
+      takeCredits(player, GHOST_COST);
+    } else {
+      player.server.runCommandSilent(
+        `tellraw ${player.username} [{"text":"You cannot afford to Ghost", "color":"dark_red"}]`
+      );
+      return;
+    }
+  }
+
+  GHOST_USED.set(`${player.uuid}`, Date.now());
+  player.server.runCommandSilent(
+    `tellraw @a {"text":"", "extra": [${JSON.stringify(
+      getPlayerChatName(player)
+    )}, {"text":" has activated Ghost Organisation", "color":"gray"}]}`
+  );
+
+  player.server.runCommandSilent(`bossbar remove ghost_${player}`);
+  player.server.runCommandSilent(
+    `bossbar add ghost_${player.username.toLowerCase()} [{"text":"Ghost Duration: ${timeToString(
+      GHOST_DURATION * 1000
+    )}"}]`
+  );
+  player.server.runCommandSilent(
+    `bossbar set ghost_${player.username.toLowerCase()} value 100`
+  );
+  player.server.runCommandSilent(
+    `bossbar set ghost_${player.username.toLowerCase()} players ${
+      player.username
+    }`
+  );
+}
+
+ServerEvents.tick((e) => {
+  if (e.server.tickCount % 20 != 0) return;
+
+  GHOST_USED.forEach((v, k) => {
+    let endsAt = v + GHOST_DURATION * 1000;
+    let now = Date.now();
+    let player = getPlayerName(k).toLowerCase();
+    if (endsAt > now) {
+      let remaining = endsAt - now;
+      let total = GHOST_DURATION * 1000;
+      let progress = Math.floor((remaining / total) * 100);
+      e.server.runCommandSilent(
+        `bossbar set ghost_${player} value ${progress}`
+      );
+      e.server.runCommandSilent(
+        `bossbar set ghost_${player} name [{"text":"Ghost Duration: ${timeToString(
+          remaining
+        )}"}]`
+      );
+    } else {
+      GHOST_USED.delete(k);
+      player = e.server.getPlayer(k)
+      e.server.runCommandSilent(`bossbar remove ghost_${player.username.toLowerCase()}`);
+      e.server.runCommandSilent(
+    `tellraw @a {"text":"", "extra": [${JSON.stringify(
+      getPlayerChatName(player)
+    )}, {"text":" has left Ghost Organisation", "color":"gray"}]}`
+  );
+    }
+  });
+});
+
 // GUI
 
 let TrackerMenu = new Menu(
@@ -551,23 +668,25 @@ let TrackerMenu = new Menu(
             entity.player ? entity.username : entity.name.string,
             menu.player.getDistance(entity.position())
           );
+
+          let ghosted = GHOST_USED.get(`${entity.uuid}`)
           menu.gui.slot(column, 0, (slot) => {
             slot.item = createMenuButton({
               title: [
-                { text: `${unobfuscatedString}` },
+                { text: `${unobfuscatedString}`, obfuscated: ghosted},
                 { text: `${obfuscatedString}`, obfuscated: true },
               ],
               description: [
                 [
                   {
-                    text: `§7Dimension: ${coloredDimension(
+                    text: ghosted ? "§7Dimension: §8???" : `§7Dimension: ${coloredDimension(
                       cleanIDToName(entity.level.dimension)
                     )}`,
                   },
                 ],
                 [
                   {
-                    text: `§7Distance: §f${entity
+                    text: ghosted ? "§7Distance: §8???" : `§7Distance: §f${entity
                       .position()
                       .distanceTo(menu.player.position())
                       .toFixed(2)} blocks`,
@@ -596,6 +715,7 @@ let TrackerMenu = new Menu(
         if (tracker) {
           let customData = tracker.getCustomData();
           if (customData.autoTracker == false) {
+            // Auto Tracking
             menu.gui.slot(4, 4, (slot) => {
               slot.item = createMenuButton({
                 title: [{ text: "Auto Track", color: "green", italic: false }],
@@ -631,6 +751,98 @@ let TrackerMenu = new Menu(
               };
             });
           }
+
+          // Special Powers
+
+          menu.gui.slot(3, 4, (slot) => {
+            let ghostLastUsed = GHOST_USED.get(`${menu.player.uuid}`);
+            let cooldown = "";
+            if (
+              ghostLastUsed &&
+              Date.now() - ghostLastUsed <= GHOST_COOLDOWN * 1000
+            ) {
+              let endsAt = ghostLastUsed + GHOST_COOLDOWN * 1000;
+              cooldown = timeToString(endsAt - Date.now());
+            }
+
+            let description = [
+              [
+                {
+                  text: "§7Activates Ghost",
+                  color: "green",
+                  italic: false,
+                },
+              ],
+              [
+                {
+                  text: "§7You cannot be tracked during the duration",
+                  color: "green",
+                  italic: false,
+                },
+              ],
+              [
+                {
+                  text: "",
+                  color: "green",
+                  italic: false,
+                },
+              ],
+            ];
+
+            if (FEATURE_CREDITS) {
+              description.push([
+                {
+                  text: `Cost: $${GHOST_COST}`,
+                  color: "yellow",
+                  italic: false,
+                },
+              ]);
+            }
+
+            description.push(
+              [
+                {
+                  text: "Duration: ",
+                  color: "green",
+                  italic: false,
+                },
+                {
+                  text: timeToString(GHOST_DURATION * 1000),
+                  color: "green",
+                  italic: false,
+                },
+              ],
+              [
+                {
+                  text: "Cooldown: ",
+                  color: "red",
+                  italic: false,
+                },
+                {
+                  text: timeToString(GHOST_COOLDOWN * 1000),
+                  color: "red",
+                  italic: false,
+                },
+              ]
+            );
+
+            slot.item = createMenuButton({
+              title: [
+                {
+                  text: `Ghost${cooldown ? ` (${cooldown})` : ""}`,
+                  color: "white",
+                  italic: false,
+                },
+              ],
+              description: description,
+              itemID: "minecraft:structure_void",
+            });
+
+            slot.leftClicked = (e) => {
+              menu.close();
+              activateGhost(menu.player);
+            };
+          });
         }
       },
     },
