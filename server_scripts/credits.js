@@ -66,7 +66,7 @@ ServerEvents.tick((e) => {
   if (!FEATURE_CREDITS) return;
   if (e.server.tickCount % 20 != 0) return;
 
-  let leaderboardData = getLeaderboard();
+  let leaderboardData = getLeaderboard().sort((a, b) => a.credits < b.credits)
 
   const objectiveName = "bb_leaderboard";
   const objectiveDisplayName = `{"text":" Credits ", "color":"yellow"}`;
@@ -90,7 +90,7 @@ ServerEvents.tick((e) => {
       /** @type {TextComponent[]} */
       let displayNameJsonComponent = [
         { text: `${actualPlayerName} ` },
-        { text: `$${credits}`, color: "yellow" },
+        { text: `$${numbersWithCommas(credits)}`, color: "yellow" },
       ];
 
       let displayNameJsonString = JSON.stringify(displayNameJsonComponent);
