@@ -1,0 +1,98 @@
+{
+	"iron": {
+		"name": "Iron",
+		"icon": "minecraft:iron_sword",
+		"items": [
+			{
+				"item": "minecraft:iron_sword",
+				"slot": 0
+			},
+			{
+				"item": "64x minecraft:golden_carrot",
+				"slot": 1
+			},
+			{
+				"item": "minecraft:iron_boots",
+				"slot": 36
+			},
+			{
+				"item": "minecraft:iron_leggings",
+				"slot": 37
+			},
+			{
+				"item": "minecraft:iron_chestplate",
+				"slot": 38
+			},
+			{
+				"item": "minecraft:iron_helmet",
+				"slot": 39
+			}
+		]
+	},
+	"leather": {
+		"name": "Leather",
+		"icon": "minecraft:bow",
+		"items": [
+			{
+				"item": "minecraft:bow",
+				"slot": 0
+			},
+			{
+				"item": "64x minecraft:arrow",
+				"slot": 1
+			},
+			{
+				"item": "minecraft:leather_boots",
+				"slot": 36
+			},
+			{
+				"item": "minecraft:leather_leggings",
+				"slot": 37
+			},
+			{
+				"item": "minecraft:leather_chestplate",
+				"slot": 38
+			},
+			{
+				"item": "minecraft:leather_helmet",
+				"slot": 39
+			}
+		]
+	},
+	"dirt": {
+		"name": "dirt",
+		"icon": "minecraft:dirt[enchantments={levels:{\"minecraft:knockback\":100}}]",
+		"items": [
+			{
+				"item": "minecraft:dirt[enchantments={levels:{\"minecraft:knockback\":100}}]",
+				"slot": 0
+			}
+		]
+	},
+	"harm": {
+		"name": "Harm",
+		"icon": "ars_nouveau:archmage_spell_book[ars_nouveau:spell_caster={max_slots:10,spells:{0:{color:{b:180,g:25,id:\"ars_nouveau:constant\",r:255},name:\"\",recipe:[\"ars_nouveau:glyph_projectile\",\"ars_nouveau:glyph_harm\"],sound:{}}}}]",
+		"items": [
+			{
+				"item": "ars_nouveau:archmage_spell_book[ars_nouveau:spell_caster={max_slots:10,spells:{0:{color:{b:180,g:25,id:\"ars_nouveau:constant\",r:255},name:\"\",recipe:[\"ars_nouveau:glyph_projectile\",\"ars_nouveau:glyph_harm\"],sound:{}}}}]",
+				"slot": 0
+			},
+			{
+				"item": "ars_nouveau:arcanist_boots",
+				"slot": 36
+			},
+			{
+				"item": "ars_nouveau:arcanist_leggings",
+				"slot": 37
+			},
+			{
+				"item": "ars_nouveau:arcanist_robes",
+				"slot": 38
+			},
+			{
+				"item": "ars_nouveau:arcanist_hood",
+				"slot": 39
+			}
+		]
+	}
+}
