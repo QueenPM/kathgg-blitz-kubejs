@@ -179,6 +179,7 @@ function getTrackerFromPlayer(player) {
  * @param {number} trackerSlotInt
  */
 function updateTracker(player, entity, newTrackerData, trackerSlotInt) {
+  if(!trackerSlotInt) return;
   let position = entity.blockPosition();
   let distance = player.getDistance(position);
 
