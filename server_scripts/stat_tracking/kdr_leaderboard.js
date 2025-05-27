@@ -8,6 +8,7 @@ const KDR_PATH = "kubejs/data/kdr_leaderboard.json";
  * @typedef {Object} KDRPlayer
  * @property {string} uuid : UUID of the player
  * @property {string} name : Name of the player
+ * @property {number} credits : Credits of the player
  * @property {number} kills : Number of kills
  * @property {number} player_deaths : Number of deaths
  * @property {number} natural_deaths : Number of deaths by natural or mob causes
@@ -146,6 +147,7 @@ function getPlayerData(uuid) {
     playerData = {
       uuid: uuid.toString(),
       name: playerName,
+      credits: 0,
       kills: 0,
       player_deaths: 0,
       natural_deaths: 0,
