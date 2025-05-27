@@ -20,7 +20,6 @@ const RULES = [
   "You may not build around someone's base, ei: If someone has built a wall, you cannot tower over it.",
   "You may only raid someone's base if at least one member of the base is online!",
   "You may not Steal Everything from a base, leave some items behind!",
-  "Use /rules to view this again."
 ];
 
 let lastReminderIndex = -1;
@@ -32,10 +31,11 @@ const REMINDER_TIMER = 1200 * 15; // 1200 ticks = 1 minute
  * @param {$Player} player 
  */
 function tellPlayerRules(player){
-  player.tell("§8Here are the §4Rules§8 of the Server!");
+  player.tell("§4Rules§8 of the Server!");
   for (let i = 0; i < RULES.length; i++) {
     player.tell(`§4${i+1})§8 ${RULES[i]}`);
   }
+  player.tell("§8Use /rules to view this again.");
 }
 
 ServerEvents.tick(event => {
