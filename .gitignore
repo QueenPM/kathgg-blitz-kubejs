@@ -2,5 +2,6 @@ data/*
 data
 data/
 
-
 README.txt
+data/kdr_leaderboard.json
+data/kits.json
