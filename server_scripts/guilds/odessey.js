@@ -82,16 +82,17 @@ function getGuildData(guild){
 
 /**
  * Gets a Player's Odessy Guild
- * @param {string} uuid
+ * @param {$ServerPlayer_} player
  * @returns {null|GuildInformation}
  */
-function getPlayerGuild(uuid){
+function getPlayerGuild(player){
   try{
-    let guildOptional = $GuildAPI.getPlayerGuild(uuid);
+    let guildOptional = $GuildAPI.getPlayerGuild(player);
     if(!guildOptional || !guildOptional.isPresent()) return null;
   
     return getGuildData(guildOptional.get());
   }catch(e) {
+    console.log(e)
     return null;
   }
 }
@@ -137,10 +138,28 @@ function getGuildItemComponent(guild, playerId){
     }
   }
 
-  // Divider
-  lore.push({text:""})
+  lore.push({text:"Members: ", italic: false, color: "dark_gray", extra:[{text: `${guild.members.length}`, color: "white"}]})
 
-  lore.push({text:"Members: ", italic: false, color: "gray", extra:[{text: `${guild.members.length}`, color: "white"}]})
+  // Divider for stats
+  lore.push({text:""})
+  
+  // Get the KDR & wealth for guild members.
+  let k = 0;
+  let d = 0;
+
+  let wealth = 0;
+  for(const member of guild.members){
+    let data = getPlayerData(member.UUID);
+    if(!data) continue;
+    k += data.kills;
+    d += data.player_deaths;
+    wealth += data.credits;
+  }
+  let kdr = d == 0 ? k : k == 0 ? 0 : k / d
+  
+  // Wealth
+  lore.push({text:"Wealth: ", italic: false, color: "yellow", extra:[{text: `$${numbersWithCommas(wealth)}`, color: "gold"}]})
+  lore.push({text:"KDR: ", italic: false, color: "gray", extra:[{text: `${k}`, color: "green"}, {text: `/`, color: "white"}, {text: `${d}`, color: "red"}, {text: ` (`, color: "white"}, {text: `${kdr}`, color: "green"}, {text: ` KDR)`, color: "white"}]})
 
   return {
     custom_name: JSON.stringify(name),
@@ -164,7 +183,7 @@ function getPlayerChatName(player) {
     hoverEvent: {
         action: "show_item",
         contents: {
-          id: "minecraft:stick",
+          id: `minecraft:white_banner`,
           count: 1,
           components: getGuildItemComponent(guild, player.uuid.toString())
       },
