@@ -17,6 +17,7 @@
         "./src/**/*",
         null,
         "./**/*.js",
-        "./**/*.ts"
-, "stat_tracking"    ]
+        "./**/*.ts",
+        "stat_tracking"
+    ]
 }
