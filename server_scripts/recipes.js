@@ -7,6 +7,8 @@ const RECIPES_TO_REMOVE = [
   'sophisticatedbackpacks:diamond_backpack',
   'sophisticatedbackpacks:iron_backpack_from_copper',
   'sophisticatedbackpacks:copper_backpack',
+  'lightmanscurrency:portable_atm_swap',
+  'lightmanscurrency:atm'
 ]
 
 ServerEvents.recipes(event => {
