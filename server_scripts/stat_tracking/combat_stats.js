@@ -11,7 +11,7 @@ const COMBAT_LEADERBOARD_SORTING_OPTIONS = [
   { display: "KDR", sort: (a, b) => b.kdr - a.kdr },
   { display: "Kills", sort: (a, b) => b.kills - a.kills },
   { display: "Deaths", sort: (a, b) => b.player_deaths - a.player_deaths },
-  { display: "Longest Kill", sort: (a, b) => getLongestKill(b) - getLongestKill(a) },
+  { display: "Furthest Kill", sort: (a, b) => getLongestKill(b) - getLongestKill(a) },
   { display: "Killstreak", sort: (a, b) => b.killstreak - a.killstreak },
   { display: "Highest Killstreak", sort: (a, b) => b.highest_killstreak - a.highest_killstreak }
 ];
@@ -115,7 +115,7 @@ function getCombatStats(player) {
         cs.push(`§7◆ Favourite Spell: §a${favSpell.spell.glyphs} §f(§a${favSpell.count}§f)`);
       }
     }
-    cs.push(`§7◆ Longest Kill: §e${getLongestKill(player)} blocks`,)
+    cs.push(`§7◆ Furthest Kill: §e${getLongestKill(player)} blocks`,)
     return cs;
   } catch (e) {
     print(e);
