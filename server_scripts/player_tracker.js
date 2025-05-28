@@ -16,9 +16,9 @@ let $Entity = Java.loadClass("net.minecraft.world.entity.Entity");
 // Cooldown in seconds
 const TRACKER_COOLDOWN = 30;
 // The distance at which start revealing the player's name.
-const MAX_DISTANCE = 100;
+const MAX_DISTANCE = 20;
 // The distance at which the player's name will be fully revealed.
-const REVEAL_DISTANCE = 30;
+const REVEAL_DISTANCE = 5;
 
 const DEVIATION_MIN = 5;
 const DEVIATION_MAX = 20;
@@ -133,6 +133,8 @@ function getTrackableEntities(player) {
     //   let distanceB = player.getDistance(b.blockPosition());
     //   return distanceA - distanceB;
     // });
+
+    trackableEntities.sort();
 
     return trackableEntities;
   } catch (e) {
@@ -259,7 +261,7 @@ function updateTracker(player, entity, newTrackerData, trackerSlotInt) {
 
   let { unobfuscatedString, obfuscatedString } = obfuscateUsername(
     entity.username,
-    distance
+    player.getDistance(entity.blockPosition())
   );
 
   /** @type {TextComponent[]} */
@@ -717,7 +719,6 @@ let TrackerMenu = new Menu(
           let ghosted = GHOST_USED.get(`${entity.uuid}`)
 
           let distance = deviatePosition(entity.position()).distanceTo(menu.player.position()).toFixed(2)
-          console.log(distance)
 
           menu.gui.slot(column, 0, (slot) => {
             slot.item = createMenuButton({
