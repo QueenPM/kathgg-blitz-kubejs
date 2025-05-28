@@ -32,13 +32,12 @@ function giveCredits(player, credits) {
 
   /** @type {TextComponent[]} */
   let msg = [
-    { text: `$${CREDITS_FOR_KILLS}`, color: "yellow"}
+    { text: `§e+§6$${CREDITS_FOR_KILLS}`}
   ]
 
   if(credits > CREDITS_FOR_KILLS){
     msg.push({
-      text: ` + $${credits - CREDITS_FOR_KILLS} Bonus`,
-      color: "yellow"
+      text: ` §e(+§6$${credits - CREDITS_FOR_KILLS} §eBonus)`
     })
   }
 
