@@ -39,7 +39,7 @@ function giveCredits(player, credits) {
   }
 
   player.server.runCommandSilent(`title ${player.username} actionbar ${JSON.stringify(msg)}`)
-  player.playNotifySound("entity.experience_orb.pickup", "ambient", 1, 1)
+  player.playNotifySound("lightmanscurrency:coins_clinking", "ambient", 1, 1)
 }
 
 /**
@@ -64,7 +64,7 @@ function setCredits(player, credits) {
 
 ServerEvents.tick((e) => {
   if (!FEATURE_CREDITS) return;
-  if (e.server.tickCount % 20 != 0) return;
+  if (e.server.tickCount % 80 != 0) return;
 
   let leaderboardData = getLeaderboard().sort((a, b) => a.credits < b.credits)
 
@@ -110,7 +110,7 @@ EntityEvents.death((e) => {
   if (!FEATURE_CREDITS) return;
 
   let killedPlayer = e.entity;
-  if(!killedPlayer.player) return;
+  // if(!killedPlayer.player) return;
 
   let killerPlayer = e.source.player;
   if (!killerPlayer) return;
