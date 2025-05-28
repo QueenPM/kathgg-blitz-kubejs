@@ -1,5 +1,7 @@
 // CONSTANTS
 
+let $Vec3 = Java.loadClass("net.minecraft.world.phys.Vec3")
+
 let $UUID = Java.loadClass("java.util.UUID");
 
 let $ServerPlayer = Java.loadClass("net.minecraft.server.level.ServerPlayer");
@@ -17,6 +19,9 @@ const TRACKER_COOLDOWN = 30;
 const MAX_DISTANCE = 100;
 // The distance at which the player's name will be fully revealed.
 const REVEAL_DISTANCE = 30;
+
+const DEVIATION_MIN = 5;
+const DEVIATION_MAX = 20;
 
 // Ghost Mode Config
 // Cooldown in seconds
@@ -117,16 +122,17 @@ function getTrackableEntities(player) {
       if(entity.player){
         // Ignore players in ghost mode
         if(GHOST_USED.get(`${entity.uuid}`)) continue;
+        if(entity.uuid.toString() === player.uuid.toString()) continue;
         trackableEntities.push(entity);
       }
     }
 
     // Calculate distance and sort entities
-    trackableEntities.sort((a, b) => {
-      let distanceA = player.getDistance(a.blockPosition());
-      let distanceB = player.getDistance(b.blockPosition());
-      return distanceA - distanceB;
-    });
+    // trackableEntities.sort((a, b) => {
+    //   let distanceA = player.getDistance(a.blockPosition());
+    //   let distanceB = player.getDistance(b.blockPosition());
+    //   return distanceA - distanceB;
+    // });
 
     return trackableEntities;
   } catch (e) {
@@ -194,13 +200,40 @@ function isItemTracker(tracker) {
 function getTrackerFromPlayer(player) {
   /** @type {$ItemStack_} */
   let tracker = null;
+  let slot = 0;
   for (let item of player.inventory.items) {
+    if(item.id === "minecraft:air") continue;
     if (isItemTracker(item)) {
       tracker = item;
       break;
     }
+    slot++
   }
-  return tracker;
+  return {slot: slot, tracker:tracker};
+}
+
+/**
+ * Deviates block position
+ * @param {$BlockPos_} position
+ */
+function deviatePosition(position){
+  let deviation = Math.floor(Math.random() * (DEVIATION_MAX - DEVIATION_MIN + 1) + DEVIATION_MIN);
+  let xPercent = Math.random() * 0.3;
+  let zPercent = Math.random() * 0.3;
+  let yPercent = 1 - xPercent - zPercent;
+  if (yPercent < 0) yPercent = 0;
+
+  let xDev = Math.round(deviation * xPercent) * (Math.random() < 0.5 ? 1 : -1);
+  let zDev = Math.round(deviation * zPercent) * (Math.random() < 0.5 ? 1 : -1);
+  let yDev = Math.round(deviation * yPercent) * (Math.random() < 0.5 ? 1 : -1);
+
+  let x = position.x + xDev;
+  let z = position.z + zDev;
+  let y = position.y + yDev;
+
+  let vec = new $Vec3(x, y, z)
+
+  return vec
 }
 
 /**
@@ -211,12 +244,17 @@ function getTrackerFromPlayer(player) {
  * @param {number} trackerSlotInt
  */
 function updateTracker(player, entity, newTrackerData, trackerSlotInt) {
-  if (!trackerSlotInt) return;
+  if(typeof trackerSlotInt == "undefined") return;
+
   if(GHOST_USED.get(`${entity.uuid}`)){
     player.server.runCommandSilent(`tellraw ${player.username} [{"text":"You cannot track ${entity.username} because they are Ghosted", "color":"gray"}]`)
     return;
   }
-  let position = entity.blockPosition();
+
+  let position = deviatePosition(entity.blockPosition());
+
+  // Add deviation
+
   let distance = player.getDistance(position);
 
   let { unobfuscatedString, obfuscatedString } = obfuscateUsername(
@@ -677,6 +715,10 @@ let TrackerMenu = new Menu(
           );
 
           let ghosted = GHOST_USED.get(`${entity.uuid}`)
+
+          let distance = deviatePosition(entity.position()).distanceTo(menu.player.position()).toFixed(2)
+          console.log(distance)
+
           menu.gui.slot(column, 0, (slot) => {
             slot.item = createMenuButton({
               title: [
@@ -693,10 +735,7 @@ let TrackerMenu = new Menu(
                 ],
                 [
                   {
-                    text: ghosted ? "§7Distance: §8???" : `§7Distance: §f${entity
-                      .position()
-                      .distanceTo(menu.player.position())
-                      .toFixed(2)} blocks`,
+                    text: ghosted ? "§7Distance: §8???" : `§7Distance: §f${distance} blocks`,
                   },
                 ],
                 [{ text: `Click to start tracking` }],
@@ -720,7 +759,7 @@ let TrackerMenu = new Menu(
 
         let tracker = getTrackerFromPlayer(menu.player);
         if (tracker) {
-          let customData = tracker.getCustomData();
+          let customData = tracker.tracker.getCustomData();
           if (customData.autoTracker == false) {
             // Auto Tracking
             menu.gui.slot(4, 4, (slot) => {
