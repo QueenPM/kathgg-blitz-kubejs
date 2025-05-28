@@ -12,8 +12,12 @@ const MIN_DISTANCE_CREDITS_FOR_KILLS = 4;
  * @param {number} credits
  */
 function hasCredits(player, credits) {
-  let playerData = getPlayerData(player.uuid);
-  if (playerData.credits >= credits) return true;
+  // let playerData = getPlayerData(player.uuid);
+  // if (playerData.credits >= credits) return true;
+  // return false;
+
+  let wallet = getPlayerMoney(player);
+  if(wallet.wallet.value >= credits) return true;
   return false;
 }
 
@@ -50,8 +54,10 @@ function giveCredits(player, credits) {
  * @param {number} credits
  */
 function takeCredits(player, credits) {
-  let playerData = getPlayerData(player.uuid);
-  playerData.credits -= credits;
+  // let playerData = getPlayerData(player.uuid);
+  // playerData.credits -= credits;
+
+  takePlayerMoney(player, credits)
 }
 
 /**
@@ -60,8 +66,19 @@ function takeCredits(player, credits) {
  * @param {number} credits
  */
 function setCredits(player, credits) {
-  let playerData = getPlayerData(player.uuid);
-  playerData.credits = credits;
+  // let playerData = getPlayerData(player.uuid);
+  // playerData.credits = credits;
+  
+  let playerMoney = getPlayerMoney(player);
+  let difference = credits - playerMoney.wallet.value
+
+  if(credits <= 0 || difference == 0) return;
+  
+  if(difference > 0) {
+    takePlayerMoney(player, difference*-1)
+  }else{
+    givePlayerMoney(player, difference)
+  }
 }
 
 ServerEvents.tick((e) => {
