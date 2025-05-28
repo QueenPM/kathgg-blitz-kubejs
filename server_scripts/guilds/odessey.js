@@ -137,6 +137,9 @@ function getGuildItemComponent(guild, playerId){
     }
   }
 
+  // Divider
+  lore.push({text:""})
+
   lore.push({text:"Members: ", italic: false, color: "gray", extra:[{text: `${guild.members.length}`, color: "white"}]})
 
   return {
@@ -173,44 +176,7 @@ PlayerEvents.chat((event) => {
   let chat = event.getMessage();
   let player = event.getPlayer();
 
-  // let data = getPlayerData(player.uuid);
-  // let cs = getCombatStats(data);
-
-  // Create a components array
-  let texts = [];
-
-  // Get guild
-  let guild = getPlayerGuild(player);
-
-  if (guild) {
-    texts.push({
-      text: `${guild.name} `,
-      color: guild.color,
-      hoverEvent: {
-        action: "show_item",
-        contents: {
-          id: "minecraft:stick",
-          count: 1,
-          components: getGuildItemComponent(guild, player.uuid.toString())
-        },
-      },
-    });
-  }
-
-  // Add player name
-  texts.push({
-    text: `<${player.username}> `,
-    color: "white",
-  });
-
-  // Add message
-  texts.push({
-    text: chat,
-    color: "white",
-  });
-
-  // Convert to JSON for tellraw
-  let tellraw = `tellraw @a {"text": "", "extra": ${JSON.stringify(texts)}}`;
+  let tellraw = `tellraw @a {"text": "<", "extra": [${JSON.stringify(getPlayerChatName(player))}, {"text":"> ${chat}"}]}`;
   event.server.runCommandSilent(tellraw);
   event.cancel();
 });
