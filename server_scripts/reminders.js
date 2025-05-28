@@ -1,25 +1,25 @@
 const REMINDERS = [
-  "You can view your §4Kill History§8 by typing §7/kills§8!",
-  "You can view your §4Deaths History§8 by typing §7/deaths§8!",
-  "You can view the §4Combat Leaderboard§8 by typing §7/cs§8!",
-  "Villages are §aneutral ground!§8 Meaning you cannot base or kill players in them! (You may build defenses and protect them)",
-  "If you're Chunk Loading, ensure you're not causing lag to the server!",
-  "Server restarts are every day at §a04:00 AM UTC§8!",
-  "You can party up using §7/guild§8 and claim chunks usng §7/claim§8!",
-  "You can check what items are banned using §7/banneditems§8!",
+  "View your kill history with §7/kills§8.",
+  "View your death history with §7/deaths§8.",
+  "Check the combat leaderboard with §7/cs§8.",
+  "Villages are neutral zones. No bases or combat allowed.",
+  "Avoid causing server lag when chunk loading.",
+  "Server restarts daily at §a04:00 AM UTC§8.",
+  "Form parties with §7/guild§8 and claim land with §7/claim§8.",
+  "See banned items with §7/banneditems§8.",
 ];
 
 const RULES = [
-  "No Griefing!",
-  "You cannot break blocks in or near someone's base!",
-  "You may enter their base without breakng blocks!",
-  "Villages are neutral ground. No fighting!",
-  "You are allowed to build in or around villages but you cannot base in them.",
-  "You are not allowed to take or kill villagers! All Villager Trading must take place in the village!",
-  "Stealing is allowed, under certain conditions: You must be able to break into the base without breaking blocks!",
-  "You may not build around someone's base, ei: If someone has built a wall, you cannot tower over it.",
-  "You may only raid someone's base if at least one member of the base is online!",
-  "You may not Steal Everything from a base, leave some items behind!",
+  "Griefing is strictly prohibited.",
+  "Do not break blocks in or near another player's base.",
+  "Entering other bases is allowed, but block breaking is not.",
+  "Villages are neutral zones; combat is not permitted.",
+  "Building in or around villages is allowed, but establishing a base is not.",
+  "Do not harm or remove villagers. All trading must occur within villages.",
+  "Stealing is permitted only if you can access the base without breaking blocks.",
+  "Do not build around or over another player's structures (e.g., walls).",
+  "Raiding is allowed only if at least one base member is online.",
+  "Do not completely loot a base; leave some items behind.",
 ];
 
 let lastReminderIndex = -1;
