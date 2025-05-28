@@ -134,7 +134,7 @@ function getTrackableEntities(player) {
     //   return distanceA - distanceB;
     // });
 
-    trackableEntities.sort();
+    trackableEntities.sort((a, b) => a.username - b.username);
 
     return trackableEntities;
   } catch (e) {
