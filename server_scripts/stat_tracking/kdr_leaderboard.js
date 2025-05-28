@@ -80,6 +80,7 @@ function getLeaderboard() {
 
 function saveLeaderboard() {
   if (!KDR_Leaderboard) loadLeaderboard();
+  syncCreditsWithLightman(server);
   JsonIO.write("kubejs/data/kdr_leaderboard.json", KDR_Leaderboard);
 }
 

@@ -1,5 +1,14 @@
 const CuriosAPI = Java.loadClass('top.theillusivec4.curios.api.CuriosApi')
 
+const $MoneyAPI = Java.loadClass('io.github.lightman314.lightmanscurrency.api.money.MoneyAPI')
+const $BankAPI = Java.loadClass('io.github.lightman314.lightmanscurrency.api.money.bank.BankAPI')
+const $MoneyValue = Java.loadClass('io.github.lightman314.lightmanscurrency.api.money.value.MoneyValue')
+const $CoinValue = Java.loadClass('io.github.lightman314.lightmanscurrency.api.money.value.builtin.CoinValue')
+
+const IBankAccount = Java.loadClass('io.github.lightman314.lightmanscurrency.api.money.bank.IBankAccount')
+
+
+
 const WALLET_IDS = [
   "lightmanscurrency:wallet_leather",
   "lightmanscurrency:wallet_copper",
@@ -22,52 +31,131 @@ const COIN_VALUES = [
 ]
 
 /**
- * 
+ * @typedef {Money}
+ * @property {number} value
+ * @property {string} text
+ */
+
+/**
+ * @typedef {PlayerMoney}
+ * @property {Money} wallet
+ * @property {Money} bank
+ * @property {Money} inventory
+ */
+
+/**
+ * Gets the Player's Money
  * @param {$ServerPlayer_} player 
  */
-function getPlayerWallet(player){
-  const inventory = player.inventory.allItems;
-  let total = 0;
-  let curiosWallet;
-  // can probably error but w/e
-  try{
-    let walletStack = CuriosAPI.getCuriosInventory(player).get().getCurios().get("wallet").getStacks()
-    let slots = walletStack.getSlots()
+function getPlayerMoney(player) {
+  /** @type {PlayerMoney} */
+  let playerMoney = {
 
-    /** @type {$ItemStack_} */
-    curiosWallet = walletStack.getStackInSlot(0);
-  }catch(e){
-    console.log(e)
+  }
+  let MoneyAPI = $MoneyAPI.API;
+  let BankAPI = $BankAPI.API;
+
+  // Wallet
+
+  let wallet = MoneyAPI.GetPlayersMoneyHandler(player).getStoredMoney();
+
+  // Cannot use a reduce for some reason. Weird
+  let walletTotal = 0;
+  for(const value of wallet.allValues()){
+    walletTotal += value.getCoreValue()
   }
 
-  /** @type {Array<$ItemStack_>} */
-  const wallets = [];
-
-  if(curiosWallet.id !== "minecraft:air"){
-    wallets.push(curiosWallet)
+  playerMoney.wallet = {
+    value: walletTotal,
+    text: wallet.getString()
   }
-  for(const item of inventory){
+
+  // Inventory
+
+  let inventoryTotal = 0;
+  for(const item of player.inventory.items){
     if(item.id === "minecraft:air") continue;
-    if(WALLET_IDS.some(id => id === item.id)){
-      wallets.push(item)
-      continue;
-    }
     
     let coin = COIN_VALUES.find(v => v.id === item.id);
     if(coin){
-      total += coin.value * item.count
+      inventoryTotal += coin.value * item.count
     }
   }
 
-  for(const wallet of wallets){
-    /** @type {$ItemStack_[]} */
-    let coins = wallet.toNBT()["components"]["lightmanscurrency:wallet_data"]["Items"]
-    for(const coin of coins){
-      let value = COIN_VALUES.find(v=>v.id === coin.id)
-      if(!value) continue;
-      total += value.value * coin.count;
+  if(inventoryTotal){
+    let inventoryValue = $CoinValue.fromNumber("main", inventoryTotal);
+  
+    playerMoney.inventory = {
+      value: inventoryValue.getCoreValue(),
+      text: inventoryValue.getString()
+    }
+  }else{
+    playerMoney.inventory = {
+      value: 0,
+      text: ""
     }
   }
 
-  console.log(total)
+  // Bank
+
+  /** @type {$IBankAccount_[]} */
+  let banks = BankAPI.GetAllBankAccounts(false)
+  for(const bank of banks){
+    let accountName = bank.getName().getString();
+    if(!accountName.startsWith(player.username)) continue;
+
+    let bankStorage = bank.getMoneyStorage();
+    let totalBankValue = 0;
+    for (const moneyValue of bankStorage.allValues()) {
+      totalBankValue += moneyValue.getCoreValue();
+    }
+
+    playerMoney.bank = {
+      value: totalBankValue,
+      text: bank.getBalanceText().getString() 
+    };
+    break;
+  }
+
+  return playerMoney;
+}
+
+/**
+ * Gives the Player money
+ * @param {$ServerPlayer_} player 
+ * @param {number} value
+ */
+function givePlayerMoney(player, value){
+  let MoneyAPI = $MoneyAPI.API;
+
+  let moneyToInsert = $CoinValue.fromNumber("main", value);
+  MoneyAPI.GetPlayersMoneyHandler(player).insertMoney(moneyToInsert, false)
+}
+
+/**
+ * Takes the Player money
+ * @param {$ServerPlayer_} player 
+ * @param {number} value
+ */
+function takePlayerMoney(player, value){
+  let MoneyAPI = $MoneyAPI.API;
+
+  let moneyToInsert = $CoinValue.fromNumber("main", value);
+  MoneyAPI.GetPlayersMoneyHandler(player).extractMoney(moneyToInsert, false)
+}
+
+/**
+ * Syncs all online player's lightman currency with their credits
+ * @param {$MinecraftServer_} server
+ */
+function syncCreditsWithLightman(server){
+  let players = server.playerList.getPlayers()
+  for(const player of players){
+    let value = getPlayerMoney(player);
+    let data = getPlayerData(player.uuid);
+    if(!data || !value) continue;
+
+    data.credits = value.wallet.value
+    console.log(`Synced ${player.username}'s credits to ${data.credits}`)
+  }
 }

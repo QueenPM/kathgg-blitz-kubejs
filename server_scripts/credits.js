@@ -38,6 +38,8 @@ function giveCredits(player, credits) {
     })
   }
 
+  givePlayerMoney(player, credits)
+
   player.server.runCommandSilent(`title ${player.username} actionbar ${JSON.stringify(msg)}`)
   player.playNotifySound("lightmanscurrency:coins_clinking", "ambient", 1, 1)
 }
