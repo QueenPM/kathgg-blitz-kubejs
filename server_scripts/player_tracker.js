@@ -499,7 +499,7 @@ ItemEvents.rightClicked((e) => {
     return;
   }
 
-  updateTracker(player, trackingEntity, customData);
+  updateTracker(player, trackingEntity, customData, player.inventory.selected);
 });
 
 /**
