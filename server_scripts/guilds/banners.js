@@ -3,6 +3,8 @@
 /** @type {Map<string, $ItemStack_>} */
 let GUILD_BANNER_CACHE = new Map();
 
+// TODO save in file, rather than just in memory
+
 ServerEvents.commandRegistry((event) => {
   const { commands: Commands, arguments: Arguments } = event;
   event.register(
