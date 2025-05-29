@@ -156,6 +156,6 @@ function syncCreditsWithLightman(server){
     if(!data || !value) continue;
 
     data.credits = value.wallet.value
-    console.log(`Synced ${player.username}'s credits to ${data.credits}`)
+    // console.log(`Synced ${player.username}'s credits to ${data.credits}`)
   }
 }
