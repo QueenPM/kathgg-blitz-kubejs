@@ -9,7 +9,7 @@ const $ClaimsManager = Java.loadClass(
 ).API;
 
 /**
- * @typedef GuildPermissions
+ * @typedef GuildPermissions - These are synced
  * @property {boolean} managePermissions
  * @property {boolean} operator
  * @property {boolean} teleport
@@ -18,23 +18,34 @@ const $ClaimsManager = Java.loadClass(
  */
 
 /**
- * @typedef GuildMember
- * @property {string} UUID
+ * @typedef GuildMember - These are synced
+ * @property {string} id
  * @property {string} name
- * @property {number} kills
- * @property {number} deaths
  * @property {boolean} isOwner
  * @property {GuildPermissions} permissions
  * @property {string} status
  */
 
 /**
- * @typedef GuildInformation
- * @property {string} UUID
+ * @typedef GuildSettings - This is synced
  * @property {string} name
  * @property {string} color
  * @property {string} motd
+*/
+
+/**
+ * @typedef GuildStats - These are not synced
+ * @property {number} kills
+ * @property {number} deaths
+ */
+
+/**
+ * @typedef GuildInformation
+ * @property {string} id
+ * @property {GuildSettings} settings
  * @property {GuildMember} owner
+ * @property {GuildStats} stats
+ * @property {$ItemStack_|null} banner
  * @property {GuildMember[]} members
  */
 
@@ -56,10 +67,8 @@ function getGuildData(guild){
     let member = entry.getValue();
 
     members.push({
-      UUID: playerId.toString(),
+      id: playerId.toString(),
       name: getPlayerName(playerId),
-      kills: 0,
-      deaths: 0,
       isOwner: member.isOwner(),
       permissions:member.permissions(),
       status: member.status().getDisplayName()
@@ -69,15 +78,37 @@ function getGuildData(guild){
   
   /** @type {GuildInformation} */
   let guildInformation = {
-    UUID: guild.id.toString(),
-    name: settings.displayName.toString(),
-    color: guild.color().getTextColor().toString(),
+    id: guild.id().toString(),
+    settings: {
+      name: settings.displayName.toString(),
+      color: guild.color().getTextColor().toString(),
+      motd: settings.motd.toString(),
+    },
+    stats: {
+      kills: 0,
+      deaths: 0
+    },
     owner: members.find(m => m.isOwner),
-    motd: settings.motd.toString(),
-    members: members
+    members: members,
+    banner: null
   }
+
+  console.log(guildInformation.id)
   
   return guildInformation;
+}
+
+/**
+ * Gets all Guilds of the Server
+ * @returns {GuildInformation[]}
+ */
+function getAllGuilds(){
+  let guilds = $GuildAPI.getAll(server.getAllLevels().iterator().next())
+  let guildsArray = [];
+  for(const guild of guilds){
+    guildsArray.push(getGuildData(guild))
+  }
+  return guildsArray;
 }
 
 /**
@@ -86,6 +117,13 @@ function getGuildData(guild){
  * @returns {null|GuildInformation}
  */
 function getPlayerGuild(player){
+  for(const guild of GUILDS.values()){
+    if(guild.members.some(m => m.UUID === `${player.uuid}`)){
+      return GUILDS.get(guild.UUID);
+    }
+  }
+
+  // If there still wasnt a Guild. Access the API to check.
   try{
     let guildOptional = $GuildAPI.getPlayerGuild(player);
     if(!guildOptional || !guildOptional.isPresent()) return null;
@@ -106,8 +144,8 @@ function arePlayersAllies(playerOne, playerTwo){
   const playerOneGuild = getPlayerGuild(playerOne);
   if(!playerOneGuild) return false;
   for(const member of playerOneGuild.members){
-    if(member.UUID == playerOne.uuid.toString()) continue;
-    if(member.UUID == playerTwo.uuid.toString()){
+    if(member.id == playerOne.uuid.toString()) continue;
+    if(member.id == playerTwo.uuid.toString()){
       return true;
     }
   }
@@ -124,7 +162,7 @@ function arePlayersAllies(playerOne, playerTwo){
  */
 function getGuildItemComponent(guild, playerId){
   /** @type {TextComponent} */
-  let name = {text:`${guild.name}`, italic: false, color: guild.color};
+  let name = {text:`${guild.settings.name}`, italic: false, color: guild.settings.color};
 
   /** @type {TextComponent[]} */
   let lore = [
@@ -132,7 +170,7 @@ function getGuildItemComponent(guild, playerId){
   ]
   
   if(playerId){
-    let gPlayer = guild.members.find(m => m.UUID == playerId)
+    let gPlayer = guild.members.find(m => m.id == playerId)
     if(gPlayer){
       lore.push({text:"Rank: ", italic: false, color: "yellow", extra:[{text: `${gPlayer.status.string}`}]})
     }
@@ -149,7 +187,7 @@ function getGuildItemComponent(guild, playerId){
 
   let wealth = 0;
   for(const member of guild.members){
-    let data = getPlayerData(member.UUID);
+    let data = getPlayerData(member.id);
     if(!data) continue;
     k += data.kills;
     d += data.player_deaths;

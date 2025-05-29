@@ -449,14 +449,17 @@ PlayerEvents.loggedIn(e => {
 ServerEvents.tick(event => {
   if (event.server.tickCount % 250 === 0) {
     saveLeaderboard();
+    saveGuilds();
   }
 })
 
 ServerEvents.loaded(_ => {
   loadLeaderboard();
+  loadGuilds();
 })
 
 // Save to file when the server is unloaded
 ServerEvents.unloaded(_ => {
   saveLeaderboard();
+  saveGuilds()
 })

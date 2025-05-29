@@ -14,7 +14,7 @@ ServerEvents.commandRegistry((event) => {
           /** @type {$ServerPlayer_} */
           let player = c.source.getPlayer();
           let guild = getPlayerGuild(player);
-          if (!guild || !guild.owner.UUID === c.source.getPlayer().uuid) {
+          if (!guild || !guild.owner.id === c.source.getPlayer().uuid) {
             player.tell("You need to be a guild owner to use this command!");
             return 1;
           }
@@ -42,7 +42,7 @@ ServerEvents.commandRegistry((event) => {
             return 1;
           }
 
-          GUILD_BANNER_CACHE.set(guild.UUID, heldItem);
+          GUILD_BANNER_CACHE.set(guild.id, heldItem);
           player.tell(
             "Banner has been saved to your Guild! You can now grant it to yourself with /banner get <amount>"
           );
@@ -74,7 +74,7 @@ function giveBanner(player, amount) {
     return 1;
   }
 
-  let banner = GUILD_BANNER_CACHE.get(guild.UUID);
+  let banner = GUILD_BANNER_CACHE.get(guild.id);
   if (!banner) {
     player.tell("A banner hasnt been set for your Guild yet. Urge your Guild Owner to run /banner save whilst holding a banner.");
     return 1;
