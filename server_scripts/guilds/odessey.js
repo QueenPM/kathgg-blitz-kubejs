@@ -115,6 +115,7 @@ function getAllGuilds(){
  * @returns {null|GuildInformation}
  */
 function getPlayerGuild(player){
+  if(!player.player) return null;
   if(!GUILDS) loadGuilds()
   for(const guildId in GUILDS){
     let guild = GUILDS[guildId]
