@@ -1,7 +1,8 @@
 const STARTUP_CMDS = [
   "hiddennames blocksHideName true",
   "gamerule disableElytraMovementCheck true",
-  "gamerule playersSleepingPercentage 50"
+  "gamerule playersSleepingPercentage 50",
+  "gamerule doInsomnia false"
 ]
 
 
