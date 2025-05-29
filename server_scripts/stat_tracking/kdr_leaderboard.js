@@ -44,7 +44,7 @@ const KDR_PATH = "kubejs/data/kdr_leaderboard.json";
  * @property {Object} components : NBT of the weapon in JSON format.
  */
 
-/** @type {Map<string, Player>|null} */
+/** @type {Map<string, KDRPlayer>|null} */
 let KDR_Leaderboard = null;
 
 /**
