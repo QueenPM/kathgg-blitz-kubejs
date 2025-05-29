@@ -656,6 +656,15 @@ function activateGhost(player) {
   );
 }
 
+// Remove all Boss Bars on load
+ServerEvents.loaded(e => {
+  let players = getLeaderboard();
+  for(const player of players){
+    e.server.runCommandSilent(`bossbar remove ghost_${player.name.toLowerCase()}`);
+
+  }
+})
+
 ServerEvents.tick((e) => {
   if (e.server.tickCount % 20 != 0) return;
 
