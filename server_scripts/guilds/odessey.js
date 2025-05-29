@@ -71,7 +71,7 @@ function getGuildData(guild){
       name: getPlayerName(playerId),
       isOwner: member.isOwner(),
       permissions:member.permissions(),
-      status: member.status().getDisplayName()
+      status: member.status().getDisplayName().string
     })
   }
 
@@ -172,7 +172,7 @@ function getGuildItemComponent(guild, playerId){
   if(playerId){
     let gPlayer = guild.members.find(m => m.id == playerId)
     if(gPlayer){
-      lore.push({text:"Rank: ", italic: false, color: "yellow", extra:[{text: `${gPlayer.status.fallback}`}]})
+      lore.push({text:"Rank: ", italic: false, color: "yellow", extra:[{text: `${gPlayer.status}`}]})
     }
   }
 
