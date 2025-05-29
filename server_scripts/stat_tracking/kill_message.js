@@ -7,12 +7,14 @@ const ONLY_PLAYER_KILLS = false;
 // Death events during an active arena
 EntityEvents.death((event)=>{
   if(!FEATURE_COMBAT_STATS) return;
+
   
   let killerPlayer = event.source.player ? event.server.getPlayer(event.source.player) : null;
   // If the killer is not a player, or the killer is the same as the dead player, return
   if(!killerPlayer || event.entity.username === killerPlayer.username) return
-
+  
   // Get the dead entity
+  
   let deadPlayer =  event.server.getPlayer(event.entity.username);
   // If the entity is not a player, return
   if(!deadPlayer && ONLY_PLAYER_KILLS) return;
@@ -52,6 +54,8 @@ EntityEvents.death((event)=>{
     distance: distance,
     timestamp: Date.now()
   });
+
+  // sendPlayerTitle(killerPlayer)
 
   if(distance < MIN_LENGTH) return;
   
