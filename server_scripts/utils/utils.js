@@ -159,22 +159,23 @@ function textDisplayComponent(name, lore) {
   return components.join(",");
 }
 
-// /**
-//  * Returns an object to be used in the component array
-//  * @param {TextComponent[]} name 
-//  * @param {TextComponent[][]} lore 
-//  * @returns {Object} - An object containing the custom name and lore
-//  */
-// function textDisplayComponentObject(name, lore) {
-//   let components = {};
-  
-//   if (name && name.length > 0) {
-//     components.custom_name = ["", ...name];
-//   }
-
-//   if (lore && lore.length > 0) {
-//     components.lore = lore.map(line => ["", ...line]);
-//   }
-  
-//   return { display: components };
-// }
+/**
+ * Combines two objects into a new object (like {...a, ...b}).
+ * @param {Object} a
+ * @param {Object} b
+ * @returns {Object}
+ */
+function combineObjects(a, b) {
+  var result = {};
+  for (var key in a) {
+    if (Object.prototype.hasOwnProperty.call(a, key)) {
+      result[key] = a[key];
+    }
+  }
+  for (var key in b) {
+    if (Object.prototype.hasOwnProperty.call(b, key)) {
+      result[key] = b[key];
+    }
+  }
+  return result;
+}

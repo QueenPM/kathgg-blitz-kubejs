@@ -172,7 +172,7 @@ function getGuildItemComponent(guild, playerId){
   if(playerId){
     let gPlayer = guild.members.find(m => m.id == playerId)
     if(gPlayer){
-      lore.push({text:"Rank: ", italic: false, color: "yellow", extra:[{text: `${gPlayer.status.string}`}]})
+      lore.push({text:"Rank: ", italic: false, color: "yellow", extra:[{text: `${gPlayer.status.fallback}`}]})
     }
   }
 
@@ -215,15 +215,17 @@ function getPlayerChatName(player) {
   
   let guild = getPlayerGuild(player);
   if(!guild) return { text: player.username }
+
+  let guildItem = getGuildItemComponent(guild, player.uuid.toString())
   return {
     text: player.username,
-    color: guild.color,
+    color: guild.settings.color,
     hoverEvent: {
         action: "show_item",
         contents: {
-          id: `minecraft:white_banner`,
+          id: guild.banner ? guild.banner.id : `minecraft:white_banner`,
           count: 1,
-          components: getGuildItemComponent(guild, player.uuid.toString())
+          components: guild.banner.components ? combineObjects(guild.banner.components, guildItem) : guildItem
       },
     }
   }
