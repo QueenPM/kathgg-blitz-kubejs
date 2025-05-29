@@ -17,7 +17,7 @@ function loadGuilds() {
 }
 
 function saveGuilds() {
-  console.log("Saving Guilds")
+  // console.log("Saving Guilds")
   if (!GUILDS) loadGuilds();
   syncGuilds();
   JsonIO.write(GUILDS_PATH, GUILDS);
@@ -38,7 +38,7 @@ function syncGuilds() {
   }
 
   for(const guildIdToClear of toClear){
-    console.log("DELETING")
+    // console.log("DELETING")
     delete GUILDS[guildIdToClear]
   }
 
@@ -49,7 +49,7 @@ function syncGuilds() {
 
     // If the guild does not exist, add it to memory
     if(!guildExists){
-      console.log("MAKING NEW")
+      // console.log("MAKING NEW")
       GUILDS[guild.id] = guild
       continue;
     }
@@ -59,7 +59,7 @@ function syncGuilds() {
     guildExists.owner = guild.owner;
     guildExists.members = guild.members;
 
-    console.log("updating :)")
+    // console.log("updating :)")
   }
 }
 
@@ -71,5 +71,5 @@ function saveGuildData(guild){
   if(!GUILDS) loadGuilds();
   // Race conditions but w/e really.
   GUILDS[guild.id] = guild;
-  console.log(GUILDS)
+  // console.log(GUILDS)
 }
