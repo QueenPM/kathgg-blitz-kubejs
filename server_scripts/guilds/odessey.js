@@ -92,8 +92,6 @@ function getGuildData(guild){
     members: members,
     banner: null
   }
-
-  console.log(guildInformation.id)
   
   return guildInformation;
 }
