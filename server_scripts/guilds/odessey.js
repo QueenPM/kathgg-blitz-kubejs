@@ -115,9 +115,11 @@ function getAllGuilds(){
  * @returns {null|GuildInformation}
  */
 function getPlayerGuild(player){
-  for(const guild of GUILDS.values()){
-    if(guild.members.some(m => m.UUID === `${player.uuid}`)){
-      return GUILDS.get(guild.UUID);
+  if(!GUILDS) loadGuilds()
+  for(const guildId in GUILDS){
+    let guild = GUILDS[guildId]
+    if(guild.members.some(m => m.id === `${player.uuid}`)){
+      return GUILDS[guild.id];
     }
   }
 
