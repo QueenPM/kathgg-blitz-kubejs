@@ -226,7 +226,7 @@ function getPlayerChatName(player) {
         contents: {
           id: guild.banner ? guild.banner.id : `minecraft:white_banner`,
           count: 1,
-          components: guild.banner.components ? combineObjects(guild.banner.components, guildItem) : guildItem
+          components: guild.banner ? guild.banner.components ? combineObjects(guild.banner.components, guildItem) : guildItem : guildItem
       },
     }
   }
