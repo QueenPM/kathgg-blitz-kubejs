@@ -1,10 +1,5 @@
 // Cache for Guild Banners
 
-/** @type {Map<string, $ItemStack_>} */
-let GUILD_BANNER_CACHE = new Map();
-
-// TODO save in file, rather than just in memory
-
 ServerEvents.commandRegistry((event) => {
   const { commands: Commands, arguments: Arguments } = event;
   event.register(
@@ -42,7 +37,8 @@ ServerEvents.commandRegistry((event) => {
             return 1;
           }
 
-          GUILD_BANNER_CACHE.set(guild.id, heldItem);
+          guild.banner = heldItem;
+          saveGuildData(guild)
           player.tell(
             "Banner has been saved to your Guild! You can now grant it to yourself with /banner get <amount>"
           );
@@ -52,6 +48,12 @@ ServerEvents.commandRegistry((event) => {
       )
       .then(
         Commands.literal("get").then(
+          Commands.argument(
+            "amount",
+            Arguments.INTEGER.create(event)
+          ).executes((c) => giveBanner(c.source.getPlayer(), Arguments.INTEGER.getResult(c, "amount")))
+        ).executes((c)=> giveBanner(c.source.getPlayer(), 16))
+      ).then(Commands.literal("give").then(
           Commands.argument(
             "amount",
             Arguments.INTEGER.create(event)
@@ -74,7 +76,18 @@ function giveBanner(player, amount) {
     return 1;
   }
 
-  let banner = GUILD_BANNER_CACHE.get(guild.id);
+  // Honestly, this is bad but I cba
+
+  let patternsJavaUtil = guild.banner.components ? guild.banner.components["minecraft:banner_patterns"] : null
+  let patterns = [];
+  if(patternsJavaUtil){
+    for(const p of patternsJavaUtil){
+      patterns.push(p)
+    }
+  }
+  let item = `${guild.banner.id}[banner_patterns=${JSON.stringify(patterns)}]`
+
+  let banner = Item.of(item)
   if (!banner) {
     player.tell("A banner hasnt been set for your Guild yet. Urge your Guild Owner to run /banner save whilst holding a banner.");
     return 1;
@@ -84,6 +97,7 @@ function giveBanner(player, amount) {
   if(amount <= 0) amount = 1;
 
   banner.count = amount;
+  // banner.components = guild.banner.components
 
   player.give(banner)
   return 1;

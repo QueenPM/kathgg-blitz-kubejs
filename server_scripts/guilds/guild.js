@@ -50,3 +50,12 @@ function syncGuilds() {
     guildExists.members = guild.members;
   }
 }
+
+/**
+ * Saves the Guild's data to memory
+ * @param {GuildInformation} guild 
+ */
+function saveGuildData(guild){
+  // Race conditions but w/e really.
+  GUILDS[guild.id] = guild;
+}
