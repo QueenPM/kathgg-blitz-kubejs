@@ -82,7 +82,7 @@ function getGuildData(guild){
     settings: {
       name: settings.displayName.toString(),
       color: guild.color().getTextColor().toString(),
-      motd: settings.motd.toString(),
+      motd: settings.motd ? settings.motd.toString() : "",
     },
     stats: {
       kills: 0,
