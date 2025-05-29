@@ -58,8 +58,9 @@ EntityEvents.death((event)=>{
   // sendPlayerTitle(killerPlayer)
 
   if(distance < MIN_LENGTH) return;
-  
+
   let itemComponent = itemToChatComponent(killerPlayer.handSlots[0]);
+
   let glyphs = "";
   let spellUsed = getSelectedSpell(weaponUsed);
   if(spellUsed){
@@ -67,8 +68,34 @@ EntityEvents.death((event)=>{
     let item = Item.of(`${killerPlayer.handSlots[0].id}[${displayComponent}]`);
     glyphs = `, {"text": " §8(Spell§8)", "hoverEvent": { "action": "show_item", "contents":${itemToChatComponent(item)}}}`
   }
-  let tellraw = `tellraw @a {"text": "", "extra": [${JSON.stringify(getPlayerChatName(killerPlayer))},{"text":" has slain ", "color":"dark_red"}, ${JSON.stringify(getPlayerChatName(deadPlayer || event.entity))}, {"text": " §8(§e${distance.toFixed(2)} blocks§8)", "hoverEvent": { "action": "show_item", "contents":${itemComponent}}}${glyphs}]}`
+  let tellraw = `tellraw @a {"text": "", "extra": [${JSON.stringify(getPlayerChatName(killerPlayer))},{"text":" has slain ", "color":"dark_red"}, ${JSON.stringify(getPlayerChatName(deadPlayer || event.entity))}, {"text": " §8(§e${distance.toFixed(2)} blocks§8)"`
+
+  if(itemComponent){
+    tellraw+= `, "hoverEvent": { "action": "show_item", "contents":${itemComponent}}}${glyphs}]}`
+  }else{
+    tellraw += `}]}`;
+  }
   event.server.runCommandSilent(tellraw)
-  if(deadPlayer) deadPlayer.inventory.dropAll();
+  if(deadPlayer && !event.server.getGameRules().get("keepInventory")) deadPlayer.inventory.dropAll();
+
+  if (!FEATURE_CREDITS) return;
+  
+  if (arePlayersAllies(deadPlayer || event.entity, killerPlayer)) return;
+  
+  let creditsToGive;
+  if(distance < MIN_DISTANCE_CREDITS_FOR_KILLS) {
+    creditsToGive = CREDITS_FOR_KILLS
+  }
+  else if (distance >= MAX_DISTANCE_CREDITS_FOR_KILLS) {
+    creditsToGive = CREDITS_FOR_KILLS_MAX;
+  } else {
+    creditsToGive =
+    CREDITS_FOR_KILLS +
+    (CREDITS_FOR_KILLS_MAX - CREDITS_FOR_KILLS) *
+    (distance / MAX_DISTANCE_CREDITS_FOR_KILLS);
+  }
+  creditsToGive = Math.round(creditsToGive);
+  
+  giveCredits(killerPlayer, creditsToGive);
   event.cancel();
 })

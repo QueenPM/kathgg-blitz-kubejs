@@ -124,6 +124,7 @@ ServerEvents.tick((e) => {
  * @returns {string}
  */
 function itemToChatComponent(item){
+  if(item.id === "minecraft:air") return null;
   return item.toJson().toString().replace("\"item\"", "\"id\"").replace("\"count\"", "\"Count\"").replace("nbt", "tag");
 }
 

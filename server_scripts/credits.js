@@ -124,35 +124,35 @@ ServerEvents.tick((e) => {
   }
 });
 
-EntityEvents.death((e) => {
-  if (!FEATURE_CREDITS) return;
+// EntityEvents.death((e) => {
+//   if (!FEATURE_CREDITS) return;
 
-  let killedPlayer = e.entity;
-  // if(!killedPlayer.player) return;
+//   let killedPlayer = e.entity;
+//   // if(!killedPlayer.player) return;
 
-  let killerPlayer = e.source.player;
-  if (!killerPlayer) return;
+//   let killerPlayer = e.source.player;
+//   if (!killerPlayer) return;
 
-  if (arePlayersAllies(killedPlayer, killerPlayer)) return;
+//   if (arePlayersAllies(killedPlayer, killerPlayer)) return;
 
-  let distance = killedPlayer.position().distanceTo(killerPlayer.position());
+//   let distance = killedPlayer.position().distanceTo(killerPlayer.position());
 
-  let creditsToGive;
-  if(distance < MIN_DISTANCE_CREDITS_FOR_KILLS) {
-    creditsToGive = CREDITS_FOR_KILLS
-  }
-  else if (distance >= MAX_DISTANCE_CREDITS_FOR_KILLS) {
-    creditsToGive = CREDITS_FOR_KILLS_MAX;
-  } else {
-    creditsToGive =
-      CREDITS_FOR_KILLS +
-      (CREDITS_FOR_KILLS_MAX - CREDITS_FOR_KILLS) *
-        (distance / MAX_DISTANCE_CREDITS_FOR_KILLS);
-  }
-  creditsToGive = Math.round(creditsToGive);
+//   let creditsToGive;
+//   if(distance < MIN_DISTANCE_CREDITS_FOR_KILLS) {
+//     creditsToGive = CREDITS_FOR_KILLS
+//   }
+//   else if (distance >= MAX_DISTANCE_CREDITS_FOR_KILLS) {
+//     creditsToGive = CREDITS_FOR_KILLS_MAX;
+//   } else {
+//     creditsToGive =
+//       CREDITS_FOR_KILLS +
+//       (CREDITS_FOR_KILLS_MAX - CREDITS_FOR_KILLS) *
+//         (distance / MAX_DISTANCE_CREDITS_FOR_KILLS);
+//   }
+//   creditsToGive = Math.round(creditsToGive);
 
-  giveCredits(killerPlayer, creditsToGive);
-});
+//   giveCredits(killerPlayer, creditsToGive);
+// });
 
 ServerEvents.commandRegistry((event) => {
   const { commands: Commands, arguments: Arguments } = event;
