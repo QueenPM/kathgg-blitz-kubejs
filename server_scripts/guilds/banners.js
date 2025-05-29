@@ -37,8 +37,35 @@ ServerEvents.commandRegistry((event) => {
             return 1;
           }
 
-          guild.banner = heldItem;
-          saveGuildData(guild)
+          let patterns = []
+          // Remove the tooltips. Create a new item
+          /** @type {$Tag} */
+          let components = heldItem.toNBT()["components"];
+          if (components) {
+            let parsedPatterns = components["minecraft:banner_patterns"];
+            if (parsedPatterns) {
+              console.log(parsedPatterns)
+              for(const pattern of parsedPatterns){
+                console.log(JSON.stringify(pattern.get("pattern")))
+                patterns.push({ pattern: pattern.get("pattern").getAsString(), color: pattern.get("color").getAsString() })
+              }
+            }
+          }
+
+          console.log(patterns)
+          console.log(JSON.stringify(patterns))
+
+          guild.banner = {
+            id: heldItem.id,
+            count: 1,
+            components: {
+              "minecraft:hide_additional_tooltip": {},
+              "minecraft:banner_patterns": patterns,
+            },
+          };
+
+          saveGuildData(guild);
+
           player.tell(
             "Banner has been saved to your Guild! You can now grant it to yourself with /banner get <amount>"
           );
@@ -47,27 +74,43 @@ ServerEvents.commandRegistry((event) => {
         })
       )
       .then(
-        Commands.literal("get").then(
-          Commands.argument(
-            "amount",
-            Arguments.INTEGER.create(event)
-          ).executes((c) => giveBanner(c.source.getPlayer(), Arguments.INTEGER.getResult(c, "amount")))
-        ).executes((c)=> giveBanner(c.source.getPlayer(), 16))
-      ).then(Commands.literal("give").then(
-          Commands.argument(
-            "amount",
-            Arguments.INTEGER.create(event)
-          ).executes((c) => giveBanner(c.source.getPlayer(), Arguments.INTEGER.getResult(c, "amount")))
-        ).executes((c)=> giveBanner(c.source.getPlayer(), 16))
+        Commands.literal("get")
+          .then(
+            Commands.argument(
+              "amount",
+              Arguments.INTEGER.create(event)
+            ).executes((c) =>
+              giveBanner(
+                c.source.getPlayer(),
+                Arguments.INTEGER.getResult(c, "amount")
+              )
+            )
+          )
+          .executes((c) => giveBanner(c.source.getPlayer(), 16))
+      )
+      .then(
+        Commands.literal("give")
+          .then(
+            Commands.argument(
+              "amount",
+              Arguments.INTEGER.create(event)
+            ).executes((c) =>
+              giveBanner(
+                c.source.getPlayer(),
+                Arguments.INTEGER.getResult(c, "amount")
+              )
+            )
+          )
+          .executes((c) => giveBanner(c.source.getPlayer(), 16))
       )
   );
 });
 
 /**
  * Gives the player their guild banner
- * @param {$ServerPlayer_} player 
- * @param {number} amount 
- * @returns 
+ * @param {$ServerPlayer_} player
+ * @param {number} amount
+ * @returns
  */
 function giveBanner(player, amount) {
   let guild = getPlayerGuild(player);
@@ -76,29 +119,37 @@ function giveBanner(player, amount) {
     return 1;
   }
 
-  // Honestly, this is bad but I cba
-
-  let patternsJavaUtil = guild.banner.components ? guild.banner.components["minecraft:banner_patterns"] : null
-  let patterns = [];
-  if(patternsJavaUtil){
-    for(const p of patternsJavaUtil){
-      patterns.push(p)
-    }
-  }
-  let item = `${guild.banner.id}[banner_patterns=${JSON.stringify(patterns)}]`
-
-  let banner = Item.of(item)
-  if (!banner) {
-    player.tell("A banner hasnt been set for your Guild yet. Urge your Guild Owner to run /banner save whilst holding a banner.");
+  if (!guild.banner) {
+    player.tell(
+      "A banner hasnt been set for your Guild yet. Urge your Guild Owner to run /banner save whilst holding a banner."
+    );
     return 1;
   }
 
-  if(amount > 16) amount = 16;
-  if(amount <= 0) amount = 1;
+  console.log(guild.banner)
+
+  // Honestly, this is bad but I cba
+
+  let patternsJavaUtil = guild.banner.components
+    ? guild.banner.components["minecraft:banner_patterns"]
+    : null;
+  let patterns = [];
+  if (patternsJavaUtil) {
+    for (const p of patternsJavaUtil) {
+      patterns.push(p);
+    }
+  }
+  let item = `${guild.banner.id}[banner_patterns=${JSON.stringify(patterns)}]`;
+
+  console.log(item)
+
+  let banner = Item.of(item);
+
+  if (amount > 16) amount = 16;
+  if (amount <= 0) amount = 1;
 
   banner.count = amount;
-  // banner.components = guild.banner.components
 
-  player.give(banner)
+  player.give(banner);
   return 1;
 }
