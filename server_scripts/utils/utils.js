@@ -100,6 +100,16 @@ function cleanIDToName(string) {
   return string.split(":").slice(1).join("").replace(/_/g, " ").split(" ").map(s => s.substring(0, 1).toUpperCase() + s.slice(1)).join(" ");
 }
 
+/**
+ * Turns an item name into a potential ID
+ * @param {string} string 
+ * @returns {string}
+ */
+function nameToId(string) {
+  if (typeof string !== 'string') { string = string.toString(); }
+  return string.replace(/ /g, "_").toLowerCase();
+}
+
 /** @type {$MinecraftServer_|null} */
 let server = null;
 
