@@ -255,10 +255,6 @@ function updateTracker(player, entity, newTrackerData, trackerSlotInt) {
 
   let position = deviatePosition(entity.blockPosition());
 
-  // Add deviation
-
-  let distance = player.getDistance(position);
-
   let { unobfuscatedString, obfuscatedString } = obfuscateUsername(
     entity.username,
     player.getDistance(entity.blockPosition())
@@ -311,8 +307,6 @@ function updateTracker(player, entity, newTrackerData, trackerSlotInt) {
     lore[0] = [
       { text: "Mode: ", italic: false },
       { text: "Targeted", color: "green", italic: false },
-      // {text:unobfuscatedString, color:"green", italic:false},
-      // {text:obfuscatedString, color:"green", obfuscated:true, italic:false}
     ];
     lore[2] = [
       {
@@ -327,6 +321,10 @@ function updateTracker(player, entity, newTrackerData, trackerSlotInt) {
   let newCompassString = `minecraft:compass[${displayComponent},lodestone_tracker={target:{dimension:"${entity.level.dimension}",pos:[I;${position.x},${position.y},${position.z}]}, tracked:false},custom_data=${newTrackerData}]`;
   player.inventory.setItem(trackerSlotInt, Item.of(newCompassString));
   player.playNotifySound("minecraft:block.note_block.bell", "master", 1, 1);
+
+  if(entity.player){
+    sendPlayerWarning(entity, "You're being Tracked!", "Someone has pinged your location.")
+  }
 }
 
 /**

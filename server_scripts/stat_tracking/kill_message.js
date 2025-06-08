@@ -55,8 +55,6 @@ EntityEvents.death((event)=>{
     timestamp: Date.now()
   });
 
-  // sendPlayerTitle(killerPlayer)
-
   if(distance < MIN_LENGTH) return;
 
   let itemComponent = itemToChatComponent(killerPlayer.handSlots[0]);
