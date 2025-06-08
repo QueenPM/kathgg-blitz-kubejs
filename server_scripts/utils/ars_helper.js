@@ -45,6 +45,7 @@ function getSpellPartTypeName(typeIndex) {
 /**
  * @typedef {Object} SpellComponent
  * @property {string} name
+ * @property {$ItemStack_} item
  * @property {number} typeIndex
  * @property {SpellPartType} type,
  * @property {integer} tier
@@ -69,6 +70,7 @@ function getSelectedSpell(spellbook) {
       for (const spellPart of spell.recipe()) {
         recipe.push({
           name: spellPart.getName(),
+          item: spellPart.glyphItem,
           typeIndex: spellPart.getTypeIndex(),
           type: getSpellPartTypeName(spellPart.getTypeIndex()),
           tier: spellPart.getConfigTier().value
