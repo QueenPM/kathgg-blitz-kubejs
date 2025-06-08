@@ -32,7 +32,7 @@ EntityEvents.death((event) => {
     tellRawComponents.push({ text: "☠ ", color: "white" });
 
     if (event.entity?.username === killerPlayer?.username) {
-      tellRawComponents.push(getPlayerChatName(deadPlayer || event.entity), {
+      tellRawComponents.push(getPlayerChatComponent(deadPlayer || event.entity), {
         text: " has killed themselves",
         color: "gray",
       });
@@ -45,7 +45,7 @@ EntityEvents.death((event) => {
       for (const msg of deathMessage) {
         if (msg == deadPlayer.username) {
           tellRawComponents.push(
-            getPlayerChatName(deadPlayer || event.entity),
+            getPlayerChatComponent(deadPlayer || event.entity),
             { text: " " }
           );
           continue;
@@ -100,9 +100,9 @@ EntityEvents.death((event) => {
 
   tellRawComponents.push(
     { text: "🏹 ", color: "dark_red" },
-    getPlayerChatName(killerPlayer), // Player Name Plate
+    getPlayerChatComponent(killerPlayer), // Player Name Plate
     { text: " has slain ", color: "gray" },
-    getPlayerChatName(deadPlayer || event.entity) // Killed Player/Entity Name Plate
+    getPlayerChatComponent(deadPlayer || event.entity) // Killed Player/Entity Name Plate
   );
 
   tellRawComponents.push({ text: ` using `, color: "gray" });
@@ -207,7 +207,7 @@ function announceKillStreak(player, playerData) {
    */
   let tellRawComponents = [
     { text: "★ ", color: "yellow" },
-    getPlayerChatName(player),
+    getPlayerChatComponent(player),
     { text: ` is on a `, color: "yellow" },
     { text: `${playerData.killstreak}`, color: "yellow", italic: true },
     { text: ` Killstreak! `, color: "yellow" },

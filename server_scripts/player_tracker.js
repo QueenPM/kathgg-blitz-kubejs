@@ -634,7 +634,7 @@ function activateGhost(player) {
   GHOST_USED.set(`${player.uuid}`, Date.now());
   player.server.runCommandSilent(
     `tellraw @a {"text":"", "extra": [${JSON.stringify(
-      getPlayerChatName(player)
+      getPlayerChatComponent(player)
     )}, {"text":" has activated Ghost Organisation", "color":"gray"}]}`
   );
 
@@ -688,7 +688,7 @@ ServerEvents.tick((e) => {
       e.server.runCommandSilent(`bossbar remove ghost_${player.username.toLowerCase()}`);
       e.server.runCommandSilent(
     `tellraw @a {"text":"", "extra": [${JSON.stringify(
-      getPlayerChatName(player)
+      getPlayerChatComponent(player)
     )}, {"text":" has left Ghost Organisation", "color":"gray"}]}`
   );
     }
