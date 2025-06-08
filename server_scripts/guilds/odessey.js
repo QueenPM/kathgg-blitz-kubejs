@@ -1,5 +1,7 @@
 // priority: 0
 
+const MAX_GUILD_NAME_LENGTH = 10;
+
 const $GuildAPI = Java.loadClass(
   "earth.terrarium.odyssey_allies.api.teams.guild.GuildApi"
 ).API;
@@ -79,7 +81,7 @@ function getGuildData(guild) {
   let guildInformation = {
     id: guild.id().toString(),
     settings: {
-      name: settings.displayName.toString(),
+      name: settings.displayName.toString().trim(),
       color: guild.color().getTextColor().toString(),
       motd: settings.motd ? settings.motd.toString() : "",
     },
@@ -241,31 +243,93 @@ function getGuildItemComponent(guild, playerId) {
   };
 }
 
+const ACRONYM_LOWERCASE_WORDS = [
+  "for",
+  "and",
+  "nor",
+  "but",
+  "or",
+  "yet",
+  "so", // Conjunctions
+  "a",
+  "an",
+  "the", // Articles
+  "as",
+  "at",
+  "by",
+  "for",
+  "in",
+  "of",
+  "off",
+  "on",
+  "per",
+  "to",
+  "up",
+  "via", // Prepositions
+  "is",
+  "it",
+];
+
 /**
  * Helper function to use the Player's name with Guild Information to be used in Chat
  * @param {$LivingEntity_} player
  */
 function getGuildChatComponent(player) {
-  // Check for entity
   if (!player.player) return null;
 
-  let guild = getPlayerGuild(player);
-  if (!guild) return null;
+  const guildInfo = getPlayerGuild(player);
+  if (!guildInfo) return null;
 
-  let guildItem = getGuildItemComponent(guild, player.uuid.toString());
+  const guildDisplayItemNBT = getGuildItemComponent(
+    guildInfo,
+    player.uuid.toString()
+  );
+
+  let originalGuildName = guildInfo.settings.name;
+  let abbreviatedGuildName = originalGuildName;
+
+  if (originalGuildName.length > MAX_GUILD_NAME_LENGTH) {
+    const words = originalGuildName.split(" ");
+    if (words.length > 1) {
+      // Attempt to create an acronym
+      let acronym = "";
+      for (const word of words) {
+        if (word.length === 0) continue; // Skip empty strings if any from multiple spaces
+        let firstLetter = word[0];
+        if (ACRONYM_LOWERCASE_WORDS.includes(word.toLowerCase())) {
+          acronym += firstLetter.toLowerCase();
+        } else {
+          acronym += firstLetter.toUpperCase();
+        }
+      }
+      // If the acronym is still too long, or for very long single words, truncate.
+      // Or, decide if acronyms should always be used if multi-word, regardless of original length.
+      // Current logic: if original is > MAX_GUILD_NAME_LENGTH and multi-word, make acronym.
+      abbreviatedGuildName = acronym;
+      // Optionally, truncate the acronym if it's also too long
+      if (abbreviatedGuildName.length > MAX_GUILD_NAME_LENGTH) {
+        abbreviatedGuildName =
+          abbreviatedGuildName.substring(0, MAX_GUILD_NAME_LENGTH) + ".."; // Adjusted to two dots for "..."
+      }
+    } else {
+      // Single word, just truncate
+      abbreviatedGuildName =
+        originalGuildName.substring(0, MAX_GUILD_NAME_LENGTH - 3) + "...";
+    }
+  }
+
   return {
-    text: `${guild.settings.name}`,
-    color: guild.settings.color,
+    text: abbreviatedGuildName,
+    color: guildInfo.settings.color,
     hoverEvent: {
       action: "show_item",
       contents: {
-        id: guild.banner ? guild.banner.id : `minecraft:white_banner`,
+        id: guildInfo.banner ? guildInfo.banner.id : `minecraft:white_banner`,
         count: 1,
-        components: guild.banner
-          ? guild.banner.components
-            ? combineObjects(guild.banner.components, guildItem)
-            : guildItem
-          : guildItem,
+        components:
+          guildInfo.banner && guildInfo.banner.components
+            ? combineObjects(guildInfo.banner.components, guildDisplayItemNBT)
+            : guildDisplayItemNBT,
       },
     },
   };
@@ -300,7 +364,7 @@ PlayerEvents.chat((event) => {
 
   let tellRawComponents = [];
 
-  tellRawComponents = tellRawComponents.concat(getPlayerNamePlate(player))
+  tellRawComponents = tellRawComponents.concat(getPlayerNamePlate(player));
 
   tellRawComponents.push({
     text: `: ${chat}`,
