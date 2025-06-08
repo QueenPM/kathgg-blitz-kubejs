@@ -4,6 +4,8 @@ const BROADCAST_DISTANCE_MIN_LENGTH = 5;
 
 const ONLY_PLAYER_KILLS = false;
 
+const ANNOUNCE_KILLSTREAK_INTERVAL = 5;
+
 // Death events during an active arena
 EntityEvents.death((event) => {
   if (!FEATURE_COMBAT_STATS) return;
@@ -29,24 +31,29 @@ EntityEvents.death((event) => {
 
     tellRawComponents.push({ text: "☠ ", color: "white" });
 
-    if(event.entity?.username === killerPlayer?.username){
-      tellRawComponents.push(getPlayerChatName(deadPlayer || event.entity), { text:" has killed themselves", color: "gray"});
-    }else{
+    if (event.entity?.username === killerPlayer?.username) {
+      tellRawComponents.push(getPlayerChatName(deadPlayer || event.entity), {
+        text: " has killed themselves",
+        color: "gray",
+      });
+    } else {
       let deathMessage = event.source
         .getLocalizedDeathMessage(event.entity)
         .getString()
         .split(" ");
-  
+
       for (const msg of deathMessage) {
         if (msg == deadPlayer.username) {
-          tellRawComponents.push(getPlayerChatName(deadPlayer || event.entity), { text: " "});
+          tellRawComponents.push(
+            getPlayerChatName(deadPlayer || event.entity),
+            { text: " " }
+          );
           continue;
         }
-  
+
         tellRawComponents.push({ text: msg + " ", color: "gray" });
       }
     }
-
 
     // In case Keep Inventory is ON! Drop All (Canceling event)
     if (deadPlayer && !event.server.getGameRules().get("keepInventory"))
@@ -136,7 +143,11 @@ EntityEvents.death((event) => {
 
   // Killstreak
   let playerData = getPlayerData(killerPlayer.uuid);
-  if (playerData && playerData.killstreak) {
+  if (
+    playerData &&
+    playerData.killstreak &&
+    playerData.killstreak > ANNOUNCE_KILLSTREAK_INTERVAL
+  ) {
     tellRawComponents.push(
       { text: " ★ x", color: "yellow" },
       { text: `${playerData.killstreak}`, color: "yellow" }
@@ -148,6 +159,8 @@ EntityEvents.death((event) => {
   )}}`;
 
   event.server.runCommandSilent(tellrawcmd);
+
+  announceKillStreak(killerPlayer, playerData)
 
   // In case Keep Inventory is ON! Drop All (Canceling event)
   if (deadPlayer && !event.server.getGameRules().get("keepInventory"))
@@ -176,3 +189,28 @@ EntityEvents.death((event) => {
 
   event.cancel();
 });
+
+/**
+ * Anounces a Killstreak to the server
+ * @param {$ServerPlayer_} player
+ * @param {KDRPlayer} playerData
+ */
+function announceKillStreak(player, playerData) {
+  if (playerData.killstreak % ANNOUNCE_KILLSTREAK_INTERVAL !== 0) return;
+  /**
+   * @type {TextComponent[]}
+   */
+  let tellRawComponents = [
+    { text: "★ ", color: "yellow" },
+    getPlayerChatName(player),
+    { text: ` is on a `, color: "yellow" },
+    { text: `${playerData.killstreak}`, color: "yellow", italic: true },
+    { text: ` Killstreak! `, color: "yellow" },
+  ];
+
+  const tellrawcmd = `tellraw @a {"text": "", "extra": ${JSON.stringify(
+    tellRawComponents
+  )}}`;
+
+  player.server.runCommandSilent(tellrawcmd);
+}
