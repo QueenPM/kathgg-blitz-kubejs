@@ -125,7 +125,7 @@ EntityEvents.death((event) => {
       color: "dark_purple",
       hoverEvent: { action: "show_item", contents: glyphs.toJson() },
     });
-  } else {
+  } else if(weaponUsed.id !== "minecraft:air"){
     // Get the Mainhand Weapon
     let weaponName = weaponUsed.getDisplayName().getString();
     weaponName = weaponName.substring(1, weaponName.length() - 1);
@@ -133,6 +133,11 @@ EntityEvents.death((event) => {
     tellRawComponents.push({
       text: weaponName,
       hoverEvent: { action: "show_item", contents: weaponUsed.toJson() },
+    });
+  }else{
+    // Using Fists
+    tellRawComponents.push({
+      text: "Fists",
     });
   }
 
