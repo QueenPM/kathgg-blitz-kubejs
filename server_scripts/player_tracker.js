@@ -638,7 +638,7 @@ function activateGhost(player) {
     )}, {"text":" has activated Ghost Organisation", "color":"gray"}]}`
   );
 
-  player.server.runCommandSilent(`bossbar remove ghost_${player}`);
+  player.server.runCommandSilent(`bossbar remove ghost_${player.username.toLowerCase()}`);
   player.server.runCommandSilent(
     `bossbar add ghost_${player.username.toLowerCase()} [{"text":"Ghost Duration: ${timeToString(
       GHOST_DURATION * 1000
