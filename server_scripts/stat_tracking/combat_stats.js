@@ -172,7 +172,7 @@ function getPlayerChatComponent(player) {
 
   return {
     text: `${player.username}`,
-    color: "green", // TODO ranks?
+    color: "white", // TODO ranks?
     hoverEvent: {
         action: "show_item",
         contents: {
