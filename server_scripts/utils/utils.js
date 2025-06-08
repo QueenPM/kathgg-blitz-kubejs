@@ -1,3 +1,5 @@
+
+
 /**
  * Returns the ItemStack of the player's head.
  * @param {string} playerName
@@ -189,4 +191,57 @@ function combineObjects(a, b) {
     }
   }
   return result;
+}
+
+const $ChatFormatting = Java.loadClass("net.minecraft.ChatFormatting");
+
+/**
+ * Flattens an Array of Text Component into a string and adds color codes
+ * @param {TextComponent[]} textComponents 
+ * @returns {string}
+ */
+function flattenTextComponent(textComponents){
+  let resultString = "";
+  for(const component of textComponents){
+    let formattingCode = "";
+    if (component.color) {
+      try {
+        // Convert color name to uppercase to match ChatFormatting enum names
+        let colorEnumName = component.color.toUpperCase();
+        let chatFormatting = $ChatFormatting[colorEnumName];
+        if (chatFormatting) {
+          formattingCode = chatFormatting.toString();
+        }
+      } catch (e) {
+        console.error(`KJS: Error parsing color '${component.color}': ${e}`);
+        // Fallback or default color can be handled here if needed
+      }
+    }
+
+    // Append formatting codes for boolean styles if they are true
+    if (component.bold) formattingCode += $ChatFormatting.BOLD.toString();
+    if (component.italic) formattingCode += $ChatFormatting.ITALIC.toString();
+    if (component.underlined) formattingCode += $ChatFormatting.UNDERLINE.toString();
+    if (component.strikethrough) formattingCode += $ChatFormatting.STRIKETHROUGH.toString();
+    if (component.obfuscated) formattingCode += $ChatFormatting.OBFUSCATED.toString();
+    
+    resultString += formattingCode + component.text;
+    
+    // Add reset code if there was any formatting to prevent color bleed to next component
+    // unless the next component also defines a color.
+    // This is a common practice but might need adjustment based on how you build your components.
+    if (formattingCode) {
+        // Check if it's not the last component or if the next component doesn't have its own color
+        let currentIndex = textComponents.indexOf(component);
+        if (currentIndex < textComponents.length - 1) {
+            let nextComponent = textComponents[currentIndex + 1];
+            if (!nextComponent.color && (component.color || component.bold || component.italic || component.underlined || component.strikethrough || component.obfuscated)) {
+                 resultString += $ChatFormatting.RESET.toString();
+            }
+        } else { // For the last component, if it had formatting, reset at the very end.
+            resultString += $ChatFormatting.RESET.toString();
+        }
+    }
+  }
+  return resultString;
 }
