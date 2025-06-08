@@ -139,7 +139,7 @@ function getPlayerItemComponent(player) {
         {
           text: `§7◆ Favourite Spell: §a${favSpell.spell.name} §f(§a${favSpell.count}§f)`,
         },
-        { text: `§7◆ Glyphs: §a${favSpell.spell.glyphs}` }
+        { text: `§7◆ Glyphs: §a${flattenTextComponent(colorSpellGlyphs(favSpell.spell.recipe))}` }
       );
     } else {
       lore.push({
