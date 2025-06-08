@@ -31,7 +31,7 @@ const $ClaimsManager = Java.loadClass(
  * @property {string} name
  * @property {string} color
  * @property {string} motd
-*/
+ */
 
 /**
  * @typedef GuildStats - These are not synced
@@ -52,8 +52,8 @@ const $ClaimsManager = Java.loadClass(
 /**
  * Helper function to get Guild Data in a clean format with JSDocs
  * @returns {GuildInformation}
-*/ 
-function getGuildData(guild){
+ */
+function getGuildData(guild) {
   let settings = guild.settings();
 
   /** @type {GuildMember[]} */
@@ -70,12 +70,11 @@ function getGuildData(guild){
       id: playerId.toString(),
       name: getPlayerName(playerId),
       isOwner: member.isOwner(),
-      permissions:member.permissions(),
-      status: member.status().getDisplayName().string
-    })
+      permissions: member.permissions(),
+      status: member.status().getDisplayName().string,
+    });
   }
 
-  
   /** @type {GuildInformation} */
   let guildInformation = {
     id: guild.id().toString(),
@@ -86,13 +85,13 @@ function getGuildData(guild){
     },
     stats: {
       kills: 0,
-      deaths: 0
+      deaths: 0,
     },
-    owner: members.find(m => m.isOwner),
+    owner: members.find((m) => m.isOwner),
     members: members,
-    banner: null
-  }
-  
+    banner: null,
+  };
+
   return guildInformation;
 }
 
@@ -100,11 +99,11 @@ function getGuildData(guild){
  * Gets all Guilds of the Server
  * @returns {GuildInformation[]}
  */
-function getAllGuilds(){
-  let guilds = $GuildAPI.getAll(server.getAllLevels().iterator().next())
+function getAllGuilds() {
+  let guilds = $GuildAPI.getAll(server.getAllLevels().iterator().next());
   let guildsArray = [];
-  for(const guild of guilds){
-    guildsArray.push(getGuildData(guild))
+  for (const guild of guilds) {
+    guildsArray.push(getGuildData(guild));
   }
   return guildsArray;
 }
@@ -114,39 +113,39 @@ function getAllGuilds(){
  * @param {$ServerPlayer_} player
  * @returns {null|GuildInformation}
  */
-function getPlayerGuild(player){
-  if(!player.player) return null;
-  if(!GUILDS) loadGuilds()
-  for(const guildId in GUILDS){
-    let guild = GUILDS[guildId]
-    if(guild.members.some(m => m.id === `${player.uuid}`)){
+function getPlayerGuild(player) {
+  if (!player.player) return null;
+  if (!GUILDS) loadGuilds();
+  for (const guildId in GUILDS) {
+    let guild = GUILDS[guildId];
+    if (guild.members.some((m) => m.id === `${player.uuid}`)) {
       return GUILDS[guild.id];
     }
   }
 
   // If there still wasnt a Guild. Access the API to check.
-  try{
+  try {
     let guildOptional = $GuildAPI.getPlayerGuild(player);
-    if(!guildOptional || !guildOptional.isPresent()) return null;
-  
+    if (!guildOptional || !guildOptional.isPresent()) return null;
+
     return getGuildData(guildOptional.get());
-  }catch(e) {
-    console.log(e)
+  } catch (e) {
+    console.log(e);
     return null;
   }
 }
 
 /**
  * Helper function to check if both players are in the same guild or are allies
- * @param {$ServerPlayer_} playerOne 
- * @param {$ServerPlayer_} playerTwo 
+ * @param {$ServerPlayer_} playerOne
+ * @param {$ServerPlayer_} playerTwo
  */
-function arePlayersAllies(playerOne, playerTwo){
+function arePlayersAllies(playerOne, playerTwo) {
   const playerOneGuild = getPlayerGuild(playerOne);
-  if(!playerOneGuild) return false;
-  for(const member of playerOneGuild.members){
-    if(member.id == playerOne.uuid.toString()) continue;
-    if(member.id == playerTwo.uuid.toString()){
+  if (!playerOneGuild) return false;
+  for (const member of playerOneGuild.members) {
+    if (member.id == playerOne.uuid.toString()) continue;
+    if (member.id == playerTwo.uuid.toString()) {
       return true;
     }
   }
@@ -161,82 +160,156 @@ function arePlayersAllies(playerOne, playerTwo){
  * @param {GuildInformation} guild
  * @param {string|undefined} playerId?
  */
-function getGuildItemComponent(guild, playerId){
+function getGuildItemComponent(guild, playerId) {
   /** @type {TextComponent} */
-  let name = {text:`${guild.settings.name}`, italic: false, color: guild.settings.color};
+  let name = {
+    text: `${guild.settings.name}`,
+    italic: false,
+    color: guild.settings.color,
+  };
 
   /** @type {TextComponent[]} */
   let lore = [
-    {text:"Owner: ", italic: false, color: "yellow", extra:[{text: `${guild.owner.name}`, color: "white"}]},
-  ]
-  
-  if(playerId){
-    let gPlayer = guild.members.find(m => m.id == playerId)
-    if(gPlayer){
-      lore.push({text:"Rank: ", italic: false, color: "yellow", extra:[{text: `${gPlayer.status}`}]})
+    {
+      text: "Owner: ",
+      italic: false,
+      color: "yellow",
+      extra: [{ text: `${guild.owner.name}`, color: "white" }],
+    },
+  ];
+
+  if (playerId) {
+    let gPlayer = guild.members.find((m) => m.id == playerId);
+    if (gPlayer) {
+      lore.push({
+        text: "Rank: ",
+        italic: false,
+        color: "yellow",
+        extra: [{ text: `${gPlayer.status}` }],
+      });
     }
   }
 
-  lore.push({text:"Members: ", italic: false, color: "dark_gray", extra:[{text: `${guild.members.length}`, color: "white"}]})
+  lore.push({
+    text: "Members: ",
+    italic: false,
+    color: "dark_gray",
+    extra: [{ text: `${guild.members.length}`, color: "white" }],
+  });
 
   // Divider for stats
-  lore.push({text:""})
-  
+  lore.push({ text: "" });
+
   // Get the KDR & wealth for guild members.
   let k = 0;
   let d = 0;
 
   let wealth = 0;
-  for(const member of guild.members){
+  for (const member of guild.members) {
     let data = getPlayerData(member.id);
-    if(!data) continue;
+    if (!data) continue;
     k += data.kills;
     d += data.player_deaths;
     wealth += data.credits;
   }
-  let kdr = d == 0 ? k : k == 0 ? 0 : k / d
-  
+  let kdr = d == 0 ? k : k == 0 ? 0 : k / d;
+
   // Wealth
-  lore.push({text:"Wealth: ", italic: false, color: "yellow", extra:[{text: `$${numbersWithCommas(wealth)}`, color: "gold"}]})
-  lore.push({text:"KDR: ", italic: false, color: "gray", extra:[{text: `${k}`, color: "green"}, {text: `/`, color: "white"}, {text: `${d}`, color: "red"}, {text: ` (`, color: "white"}, {text: `${kdr}`, color: "green"}, {text: ` KDR)`, color: "white"}]})
+  lore.push({
+    text: "Wealth: ",
+    italic: false,
+    color: "yellow",
+    extra: [{ text: `$${numbersWithCommas(wealth)}`, color: "gold" }],
+  });
+  lore.push({
+    text: "KDR: ",
+    italic: false,
+    color: "gray",
+    extra: [
+      { text: `${k}`, color: "green" },
+      { text: `/`, color: "white" },
+      { text: `${d}`, color: "red" },
+      { text: ` (`, color: "white" },
+      { text: `${kdr}`, color: "green" },
+      { text: ` KDR)`, color: "white" },
+    ],
+  });
 
   return {
     custom_name: JSON.stringify(name),
-    lore: lore.map(i => JSON.stringify(i))
-  }
+    lore: lore.map((i) => JSON.stringify(i)),
+  };
 }
 
 /**
  * Helper function to use the Player's name with Guild Information to be used in Chat
  * @param {$LivingEntity_} player
  */
-function getPlayerChatName(player) {
+function getGuildChatComponent(player) {
   // Check for entity
-  if(!player.player) return { text: player.name.string}
-  
-  let guild = getPlayerGuild(player);
-  if(!guild) return { text: player.username }
+  if (!player.player) return null;
 
-  let guildItem = getGuildItemComponent(guild, player.uuid.toString())
+  let guild = getPlayerGuild(player);
+  if (!guild) return null;
+
+  let guildItem = getGuildItemComponent(guild, player.uuid.toString());
   return {
-    text: player.username,
+    text: `${guild.settings.name}`,
     color: guild.settings.color,
     hoverEvent: {
-        action: "show_item",
-        contents: {
-          id: guild.banner ? guild.banner.id : `minecraft:white_banner`,
-          count: 1,
-          components: guild.banner ? guild.banner.components ? combineObjects(guild.banner.components, guildItem) : guildItem : guildItem
+      action: "show_item",
+      contents: {
+        id: guild.banner ? guild.banner.id : `minecraft:white_banner`,
+        count: 1,
+        components: guild.banner
+          ? guild.banner.components
+            ? combineObjects(guild.banner.components, guildItem)
+            : guildItem
+          : guildItem,
       },
-    }
+    },
+  };
+}
+
+/**
+ * Helper function to use the player's full name plate
+ * @param {$LivingEntity_} player
+ * @returns {TextComponent[]}
+ */
+function getPlayerNamePlate(player) {
+  // Check for entity
+  if (!player.player) return [{ text: player.name.string }];
+  let components = [];
+
+  const guildComp = getGuildChatComponent(player);
+  if (guildComp) {
+    components.push({ text: "[", color: "white" }, guildComp, {
+      text: "] ",
+      color: "white",
+    });
   }
+
+  components.push(getPlayerChatComponent(player));
+
+  return components;
 }
 
 PlayerEvents.chat((event) => {
-  let chat = event.getMessage();
-  let player = event.getPlayer();
+  const chat = event.getMessage();
+  const player = event.getPlayer();
 
-  let tellraw = `tellraw @a {"text": "<", "extra": [${JSON.stringify(getPlayerChatName(player))}, {"text":"> ${chat}"}]}`;
+  let tellRawComponents = [];
+
+  tellRawComponents = tellRawComponents.concat(getPlayerNamePlate(player))
+
+  tellRawComponents.push({
+    text: `: ${chat}`,
+    color: "white",
+  });
+
+  let tellraw = `tellraw @a {"text": "", "extra": ${JSON.stringify(
+    tellRawComponents
+  )}}`;
   event.server.runCommandSilent(tellraw);
   event.cancel();
 });

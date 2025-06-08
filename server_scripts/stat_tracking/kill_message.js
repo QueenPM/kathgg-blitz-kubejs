@@ -44,8 +44,8 @@ EntityEvents.death((event) => {
 
       for (const msg of deathMessage) {
         if (msg == deadPlayer.username) {
+          tellRawComponents = tellRawComponents.concat(getPlayerNamePlate(deadPlayer || event.entity))
           tellRawComponents.push(
-            getPlayerChatComponent(deadPlayer || event.entity),
             { text: " " }
           );
           continue;
@@ -100,10 +100,12 @@ EntityEvents.death((event) => {
 
   tellRawComponents.push(
     { text: "🏹 ", color: "dark_red" },
-    getPlayerChatComponent(killerPlayer), // Player Name Plate
-    { text: " has slain ", color: "gray" },
-    getPlayerChatComponent(deadPlayer || event.entity) // Killed Player/Entity Name Plate
   );
+  tellRawComponents = tellRawComponents.concat(getPlayerNamePlate(killerPlayer))
+  tellRawComponents.push(
+    { text: " has slain ", color: "gray" }
+  )
+  tellRawComponents = tellRawComponents.concat(getPlayerNamePlate(deadPlayer || event.entity))
 
   tellRawComponents.push({ text: ` using `, color: "gray" });
 
