@@ -141,7 +141,6 @@ function addDeath(player, source) {
  * @returns {KDRPlayer}
  */
 function getPlayerData(uuid) {
-  if(typeof uuid !== "string") return null;
   if (!KDR_Leaderboard) loadLeaderboard();
   let playerData = KDR_Leaderboard[uuid];
   if (!playerData) {
