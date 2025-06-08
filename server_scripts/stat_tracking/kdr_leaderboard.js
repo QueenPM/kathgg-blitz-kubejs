@@ -124,7 +124,7 @@ function addDeath(player, source) {
     let playerPosition = player.blockPosition();
   
     playerData.death_history.push({
-      source_type: source.getType()||null,
+      source_type: source.getType() ? `${source.getType()}`:null,
       source_entity: source.actual?.type||null,
       position: [playerPosition.x, playerPosition.y, playerPosition.z],
       timestamp: Date.now()
