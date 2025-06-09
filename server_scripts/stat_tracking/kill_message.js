@@ -226,3 +226,34 @@ function announceKillStreak(player, playerData) {
 
   player.server.runCommandSilent(tellrawcmd);
 }
+
+/**
+ * Anounces a lost Killstreak to the server
+ * @param {$ServerPlayer_} killerPlayer
+ * @param {$ServerPlayer_} killedPlayer
+ * @param {number} lostKillstreak
+ */
+function announceLostkillstreak(killerPlayer, killedPlayer, lostKillstreak) {
+  /**
+   * @type {TextComponent[]}
+   */
+  let tellRawComponents = [
+    { text: "★ ", color: "yellow" },
+  ]
+  tellRawComponents = tellRawComponents.concat(getPlayerNamePlate(killerPlayer))
+  tellRawComponents.push([
+    { text: ` has ended `, color: "yellow" }
+  ])
+  tellRawComponents = tellRawComponents.concat(getPlayerNamePlate(killedPlayer))
+  tellRawComponents.push([
+    { text: `'s `, color: "yellow" },
+    { text: `${lostKillstreak}`, color: "yellow", italic: true },
+    { text: ` Killstreak! `, color: "yellow" },
+  ]);
+
+  const tellrawcmd = `tellraw @a {"text": "", "extra": ${JSON.stringify(
+    tellRawComponents
+  )}}`;
+
+  player.server.runCommandSilent(tellrawcmd);
+}

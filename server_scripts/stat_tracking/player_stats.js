@@ -117,6 +117,9 @@ function addDeath(player, source) {
   // If the source is a player, increment their deaths
   if (source.player) {
     playerData.player_deaths++;
+    if(playerData.killstreak && source.player){
+      announceLostkillstreak(source.player, player, playerData.killstreak)
+    }
     playerData.killstreak = 0;
     playerData.kdr = playerData.kills / Math.max(1, playerData.player_deaths);
   } else {
