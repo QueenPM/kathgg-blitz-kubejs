@@ -114,11 +114,11 @@ function getPlayerItemComponent(player) {
     {
       text: `§5☻ ${player.name}§f: §a${player.kills}§f/§4${
         player.player_deaths
-      } §f(§a${parseFloat(player.kdr).toFixed(2)}§f KDR)`,
+      } §f(§a${parseFloat(player.kdr).toFixed(2)}§f KDR) §e✦${player.killstreak}`,
     },
     { text: "" },
     {
-      text: `§7◆ Killstreak: §a${player.killstreak} §e✦${player.highest_killstreak}`,
+      text: `§7◆ Highest Killstreak: §e${player.highest_killstreak}`,
     },
     { text: `§7◆ Nemesis: ${getNemesis(player)}` },
     { text: `§7◆ Victim: ${getVictim(player)}` },
