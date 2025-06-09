@@ -44,9 +44,7 @@ ServerEvents.commandRegistry((event) => {
           if (components) {
             let parsedPatterns = components["minecraft:banner_patterns"];
             if (parsedPatterns) {
-              console.log(parsedPatterns);
               for (const pattern of parsedPatterns) {
-                console.log(JSON.stringify(pattern.get("pattern")));
                 patterns.push({
                   pattern: pattern.get("pattern").getAsString(),
                   color: pattern.get("color").getAsString(),
@@ -129,8 +127,6 @@ function giveBanner(player, amount) {
     return 1;
   }
 
-  console.log(guild.banner);
-
   // Honestly, this is bad but I cba
 
   let patternsJavaUtil = guild.banner.components
@@ -143,8 +139,6 @@ function giveBanner(player, amount) {
     }
   }
   let item = `${guild.banner.id}[banner_patterns=${JSON.stringify(patterns)}]`;
-
-  console.log(item);
 
   let banner = Item.of(item);
 
