@@ -212,11 +212,13 @@ function announceKillStreak(player, playerData) {
    */
   let tellRawComponents = [
     { text: "★ ", color: "yellow" },
-    getPlayerChatComponent(player),
+  ]
+  tellRawComponents = tellRawComponents.concat(getPlayerNamePlate(player))
+  tellRawComponents.push([
     { text: ` is on a `, color: "yellow" },
     { text: `${playerData.killstreak}`, color: "yellow", italic: true },
     { text: ` Killstreak! `, color: "yellow" },
-  ];
+  ]);
 
   const tellrawcmd = `tellraw @a {"text": "", "extra": ${JSON.stringify(
     tellRawComponents
