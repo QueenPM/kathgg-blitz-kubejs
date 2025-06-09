@@ -5,6 +5,7 @@ The addon has several features that you can enable/disable in server_scripts/mai
 ## Features
 - ⚔️ Combat Stats
 - 📦 Kits
+- 🪙 Credits
 - 🧭 Player Tracker
 - ❌ Banned Items
 - ℹ️ Reminders/Tips
