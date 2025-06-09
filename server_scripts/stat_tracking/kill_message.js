@@ -153,16 +153,16 @@ EntityEvents.death((event) => {
 
   // Killstreak
   let playerData = getPlayerData(killerPlayer.uuid);
-  if (
-    playerData &&
-    playerData.killstreak &&
-    playerData.killstreak > ANNOUNCE_KILLSTREAK_INTERVAL
-  ) {
-    tellRawComponents.push(
-      { text: " ★ x", color: "yellow" },
-      { text: `${playerData.killstreak}`, color: "yellow" }
-    );
-  }
+  // if (
+  //   playerData &&
+  //   playerData.killstreak &&
+  //   playerData.killstreak > ANNOUNCE_KILLSTREAK_INTERVAL
+  // ) {
+  //   tellRawComponents.push(
+  //     { text: " ★ x", color: "yellow" },
+  //     { text: `${playerData.killstreak}`, color: "yellow" }
+  //   );
+  // }
 
   const tellrawcmd = `tellraw @a {"text": "", "extra": ${JSON.stringify(
     tellRawComponents
