@@ -3,36 +3,36 @@
 // Enable/Disable features
 
 /**
- * Combat Stats
+ * ⚔️ Combat Stats
  */
 const FEATURE_COMBAT_STATS = true;
 
 /**
- * Kits
+ * 📦 Kits
  */
 const FEATURE_KITS = false;
 
 /**
- * Credits
+ * 🪙 Credits
  */
 const FEATURE_CREDITS = true;
 
 /**
- * Player Tracker
+ * 🧭 Player Tracker
  */
 const FEATURE_TRACKER = true;
 
 /**
- * Banned Items
+ * ❌ Banned Items
  */
 const FEATURE_BANNED_ITEMS = true;
 
 /**
- * Reminders
+ * ℹ️ Reminders
  */
 const FEATURE_REMINDERS = true;
 
 /**
- * Rules
+ * 📋 Rules
  */
 const FEATURE_RULES = true;
