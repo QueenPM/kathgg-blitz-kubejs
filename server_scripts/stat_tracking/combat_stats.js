@@ -132,16 +132,15 @@ function getPlayerItemComponent(player) {
 
     // Killstreaks
     {
-      text: "Current Killstreak: ",
+      text: "Killstreak: ",
       italic: false,
       color: "gray",
-      extra: [{ text: `${player.killstreak}`, color: "yellow" }],
-    },
-    {
-      text: "Highest Killstreak: ",
-      italic: false,
-      color: "gray",
-      extra: [{ text: `${player.highest_killstreak}`, color: "yellow" }],
+      extra: [
+        { text: `${player.killstreak}`, color: "yellow" }, // Current
+        { text: " / ", color: "dark_gray" },
+        { text: `${player.highest_killstreak}`, color: "gold" }, // Highest (differentiated color)
+        { text: " (Highest)", color: "gray"},
+      ],
     },
     {
       text: "Furthest Kill: ",
