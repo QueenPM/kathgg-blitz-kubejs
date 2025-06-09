@@ -43,6 +43,13 @@ ServerEvents.commandRegistry((event) => {
   );
 
   event.register(
+    Commands.literal("stats").executes((c) => {
+      KDAMenu.OpenMenu(c.source.player, "main", { sort: 0 });
+      return 1;
+    })
+  );
+
+  event.register(
     Commands.literal("kills")
       .executes((c) => kills(c.source.player, c.source.player))
       .then(
@@ -61,20 +68,6 @@ ServerEvents.commandRegistry((event) => {
             deaths(c.source.player, Arguments.PLAYER.getResult(c, "target"))
         )
       )
-  );
-
-  event.register(
-    Commands.literal("cs").executes((c) => {
-      KDAMenu.OpenMenu(c.source.player, "main", { sort: 0 });
-      return 1;
-    })
-  );
-
-  event.register(
-    Commands.literal("combatstats").executes((c) => {
-      KDAMenu.OpenMenu(c.source.player, "main", { sort: 0 });
-      return 1;
-    })
   );
 
   /**
