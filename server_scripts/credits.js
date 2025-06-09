@@ -4,7 +4,7 @@ const CREDITS_FOR_KILLS = 1;
 const CREDITS_FOR_KILLS_MAX = 25;
 // The max distance to scale it up. (CREDITS_FOR_KILLS_MAX for this or beyond distance)
 const MAX_DISTANCE_CREDITS_FOR_KILLS = 30;
-const MIN_DISTANCE_CREDITS_FOR_KILLS = 4; 
+const MIN_DISTANCE_CREDITS_FOR_KILLS = 4;
 
 /**
  * Checks if the player has the amount in credits
@@ -17,7 +17,7 @@ function hasCredits(player, credits) {
   // return false;
 
   let wallet = getPlayerMoney(player);
-  if(wallet.wallet.value >= credits) return true;
+  if (wallet.wallet.value >= credits) return true;
   return false;
 }
 
@@ -31,20 +31,20 @@ function giveCredits(player, credits) {
   playerData.credits += credits;
 
   /** @type {TextComponent[]} */
-  let msg = [
-    { text: `§e+§6$${CREDITS_FOR_KILLS}`}
-  ]
+  let msg = [{ text: `§e+§6$${CREDITS_FOR_KILLS}` }];
 
-  if(credits > CREDITS_FOR_KILLS){
+  if (credits > CREDITS_FOR_KILLS) {
     msg.push({
-      text: ` §e(+§6$${credits - CREDITS_FOR_KILLS} §eBonus)`
-    })
+      text: ` §e(+§6$${credits - CREDITS_FOR_KILLS} §eBonus)`,
+    });
   }
 
-  givePlayerMoney(player, credits)
+  givePlayerMoney(player, credits);
 
-  player.server.runCommandSilent(`title ${player.username} actionbar ${JSON.stringify(msg)}`)
-  player.playNotifySound("lightmanscurrency:coins_clinking", "ambient", 1, 1)
+  player.server.runCommandSilent(
+    `title ${player.username} actionbar ${JSON.stringify(msg)}`
+  );
+  player.playNotifySound("lightmanscurrency:coins_clinking", "ambient", 1, 1);
 }
 
 /**
@@ -56,7 +56,7 @@ function takeCredits(player, credits) {
   // let playerData = getPlayerData(player.uuid);
   // playerData.credits -= credits;
 
-  takePlayerMoney(player, credits)
+  takePlayerMoney(player, credits);
 }
 
 /**
@@ -67,16 +67,16 @@ function takeCredits(player, credits) {
 function setCredits(player, credits) {
   // let playerData = getPlayerData(player.uuid);
   // playerData.credits = credits;
-  
-  let playerMoney = getPlayerMoney(player);
-  let difference = credits - playerMoney.wallet.value
 
-  if(credits <= 0 || difference == 0) return;
-  
-  if(difference > 0) {
-    takePlayerMoney(player, difference*-1)
-  }else{
-    givePlayerMoney(player, difference)
+  let playerMoney = getPlayerMoney(player);
+  let difference = credits - playerMoney.wallet.value;
+
+  if (credits <= 0 || difference == 0) return;
+
+  if (difference > 0) {
+    takePlayerMoney(player, difference * -1);
+  } else {
+    givePlayerMoney(player, difference);
   }
 }
 
@@ -84,7 +84,7 @@ ServerEvents.tick((e) => {
   if (!FEATURE_CREDITS) return;
   if (e.server.tickCount % 80 != 0) return;
 
-  let leaderboardData = getLeaderboard().sort((a, b) => a.credits < b.credits)
+  let leaderboardData = getLeaderboard().sort((a, b) => a.credits < b.credits);
 
   const objectiveName = "bb_leaderboard";
   const objectiveDisplayName = `{"text":" Credits ", "color":"yellow"}`;

@@ -132,7 +132,11 @@ function getPlayerItemComponent(player) {
         {
           text: `§7◆ Favourite Spell: §a${favSpell.spell.name} §f(§a${favSpell.count}§f)`,
         },
-        { text: `§7◆ Glyphs: §a${flattenTextComponent(colorSpellGlyphs(favSpell.spell.recipe))}` }
+        {
+          text: `§7◆ Glyphs: §a${flattenTextComponent(
+            colorSpellGlyphs(favSpell.spell.recipe)
+          )}`,
+        }
       );
     } else {
       lore.push({
@@ -146,7 +150,7 @@ function getPlayerItemComponent(player) {
   return {
     custom_name: name,
     lore: lore,
-    profile: player.name
+    profile: player.name,
   };
 }
 
@@ -156,29 +160,29 @@ function getPlayerItemComponent(player) {
  */
 function getPlayerChatComponent(player) {
   // Check for entity
-  if(!player.player) return { text: player.name.string}
-  
-  let playerData = getPlayerData(player.uuid)
-  if(!playerData) return { text: player.name.string }
+  if (!player.player) return { text: player.name.string };
 
-  let playerItem = getPlayerItemComponent(playerData)
+  let playerData = getPlayerData(player.uuid);
+  if (!playerData) return { text: player.name.string };
+
+  let playerItem = getPlayerItemComponent(playerData);
 
   return {
     text: `${player.username}`,
     color: "white", // TODO ranks?
     hoverEvent: {
-        action: "show_item",
-        contents: {
-          id: `player_head`,
-          count: 1,
-          components: { 
-            custom_name: JSON.stringify(playerItem.custom_name),
-            lore: playerItem.lore.map((lore)=> JSON.stringify(lore)),
-            profile: playerItem.profile
-          }
+      action: "show_item",
+      contents: {
+        id: `player_head`,
+        count: 1,
+        components: {
+          custom_name: JSON.stringify(playerItem.custom_name),
+          lore: playerItem.lore.map((lore) => JSON.stringify(lore)),
+          profile: playerItem.profile,
+        },
       },
-    }
-  }
+    },
+  };
 }
 
 /**

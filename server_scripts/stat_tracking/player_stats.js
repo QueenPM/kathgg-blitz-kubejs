@@ -49,11 +49,11 @@ let PlayerStatsCache = null;
 
 /**
  * Gets the kill weapon ID
- * @param {Kill} kill 
+ * @param {Kill} kill
  */
 function getKillWeaponID(kill) {
   let weapon = kill.weapon;
-  if(kill.tacz_id) return kill.tacz_id;
+  if (kill.tacz_id) return kill.tacz_id;
   return weapon.item;
 }
 
@@ -86,7 +86,7 @@ function saveLeaderboard() {
 
 /**
  * @param {$ServerPlayer_} player - The player who got the kill
- * @param {Kill} kill 
+ * @param {Kill} kill
  */
 function addKill(player, kill) {
   if (kill.uuid == null) {
@@ -95,7 +95,10 @@ function addKill(player, kill) {
   let playerData = getPlayerData(player.uuid);
   playerData.kills++;
   playerData.killstreak++;
-  playerData.highest_killstreak = Math.max(playerData.highest_killstreak, playerData.killstreak);
+  playerData.highest_killstreak = Math.max(
+    playerData.highest_killstreak,
+    playerData.killstreak
+  );
   playerData.kill_history.push(kill);
   let victimData = PlayerStatsCache.get(kill.uuid);
   if (victimData) {
@@ -112,26 +115,26 @@ function addKill(player, kill) {
 function addDeath(player, source) {
   let playerData = getPlayerData(player.uuid);
   // If the source is a player, increment their deaths
-  if(source.player){
+  if (source.player) {
     playerData.player_deaths++;
     playerData.killstreak = 0;
     playerData.kdr = playerData.kills / Math.max(1, playerData.player_deaths);
-  }else{
+  } else {
     playerData.natural_deaths++;
   }
 
-  try{
+  try {
     let playerPosition = player.blockPosition();
-  
+
     playerData.death_history.push({
-      source_type: source.getType() ? `${source.getType()}`:null,
-      source_entity: source.actual?.type||null,
+      source_type: source.getType() ? `${source.getType()}` : null,
+      source_entity: source.actual?.type || null,
       position: [playerPosition.x, playerPosition.y, playerPosition.z],
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
-  
+
     PlayerStatsCache[player.uuid] = playerData;
-  }catch(e){
+  } catch (e) {
     print(e);
   }
 }
@@ -156,13 +159,13 @@ function getPlayerData(uuid) {
       killstreak: 0,
       highest_killstreak: 0,
       kill_history: [],
-      death_history: []
-    }
+      death_history: [],
+    };
     PlayerStatsCache[uuid] = playerData;
   }
 
   // Refresh name if its null
-  if(playerData.name == null){
+  if (playerData.name == null) {
     playerData.name = getPlayerName(uuid);
   }
 
@@ -171,9 +174,9 @@ function getPlayerData(uuid) {
 
 /**
  * Creates new data for the player if it doesnt exist. This is used on first login.
- * @param {string} uuid 
- * @param {string} name 
- * @returns 
+ * @param {string} uuid
+ * @param {string} name
+ * @returns
  */
 function createPlayerData(uuid, name) {
   // Check if the player already exists
@@ -197,8 +200,8 @@ function createPlayerData(uuid, name) {
     killstreak: 0,
     highest_killstreak: 0,
     kill_history: [],
-    death_history: []
-  }
+    death_history: [],
+  };
   leaderboard.push(data);
 }
 
@@ -212,7 +215,7 @@ function getTacZItemId(item) {
   if (!nbt) return "";
   if (typeof nbt === "string" || nbt instanceof String) {
     try {
-      let match = nbt.match(/GunId:"([^"]+)"/)
+      let match = nbt.match(/GunId:"([^"]+)"/);
       return match ? match[1] : "";
     } catch (e) {
       print(e);
@@ -228,8 +231,8 @@ let PLAYER_NAME_MAP = new Map();
 
 /**
  * Gets a player Name from UUID
- * @param {string} uuid 
- * @returns 
+ * @param {string} uuid
+ * @returns
  */
 function getPlayerName(uuid) {
   let name = PLAYER_NAME_MAP[uuid];
@@ -253,8 +256,8 @@ function getPlayerName(uuid) {
 
 /**
  * Gets a player UUID from Name
- * @param {string} name 
- * @returns 
+ * @param {string} name
+ * @returns
  */
 function getPlayerUUID(name) {
   let leaderboard = getLeaderboard();
@@ -267,14 +270,14 @@ function getPlayerUUID(name) {
 
 /**
  * Returns a Kill's Icon in ItemStack form
- * @param {Kill} kill 
+ * @param {Kill} kill
  * @returns {$ItemStackKJS_}
  */
-function getKillIcon(kill){
+function getKillIcon(kill) {
   /** @type {TextComponent[]} */
   let lore = [];
 
-    // Specials
+  // Specials
   // // TODO testing for now
   // lore.push([
   //   {text:"☆", color: "yellow", italic: false},
@@ -286,47 +289,67 @@ function getKillIcon(kill){
 
   // Add weapon
   lore.push([
-    {text:"Using: ", color:"gray", italic:false},
-    {text:cleanIDToName(kill.weapon.id), color:"green", italic:false}
-  ])
+    { text: "Using: ", color: "gray", italic: false },
+    { text: cleanIDToName(kill.weapon.id), color: "green", italic: false },
+  ]);
 
   // Check for Ars Nouveau Spellbook
-  if(isItemSpellbook(kill.weapon)){
+  if (isItemSpellbook(kill.weapon)) {
     // Add the spell information
-    let spell = getSelectedSpell(Item.of(`${kill.weapon.id}${kill.weapon.components}`));
-    if(spell){
-      if(spell.name){
-        lore.push([
-          {text:"Spell: ", color:"gray", italic:false},
-          {text:spell.name, color:"aqua", italic:true}
-        ], [{text:"Glyphs: ", color:"gray", italic: false}].concat(colorSpellGlyphs(spell.recipe)))
-      }else{
+    let spell = getSelectedSpell(
+      Item.of(`${kill.weapon.id}${kill.weapon.components}`)
+    );
+    if (spell) {
+      if (spell.name) {
+        lore.push(
+          [
+            { text: "Spell: ", color: "gray", italic: false },
+            { text: spell.name, color: "aqua", italic: true },
+          ],
+          [{ text: "Glyphs: ", color: "gray", italic: false }].concat(
+            colorSpellGlyphs(spell.recipe)
+          )
+        );
+      } else {
         // lore.push([
         //   {text:"Spell: ", color:"gray", italic:false},
         //   {text:spell.glyphs, color:"aqua", italic:false}
         // ])
-        lore.push([{text:"Spell: ", color:"gray", italic: false}].concat(colorSpellGlyphs(spell.recipe)));
+        lore.push(
+          [{ text: "Spell: ", color: "gray", italic: false }].concat(
+            colorSpellGlyphs(spell.recipe)
+          )
+        );
       }
     }
   }
 
   // Add Distance & timestamp
-  lore.push([
-    {text:"Distance: ", color:"gray", italic:false},
-    {text:kill.distance.toFixed(2), color:"gold", italic:false},
-  ],
-  [ {text:""}],
-  [
-    {text:getRelativeTimePast(kill.timestamp), color:"gray", italic:false},
-  ])
+  lore.push(
+    [
+      { text: "Distance: ", color: "gray", italic: false },
+      { text: kill.distance.toFixed(2), color: "gold", italic: false },
+    ],
+    [{ text: "" }],
+    [
+      {
+        text: getRelativeTimePast(kill.timestamp),
+        color: "gray",
+        italic: false,
+      },
+    ]
+  );
 
-  let displayComponent = textDisplayComponent([
-    {
-      text:`${kill.name}`,
-      italic:false,
-      color:"dark_purple"
-    }
-  ], lore);
+  let displayComponent = textDisplayComponent(
+    [
+      {
+        text: `${kill.name}`,
+        italic: false,
+        color: "dark_purple",
+      },
+    ],
+    lore
+  );
   return Item.of(`minecraft:player_head[${displayComponent}]`);
 }
 
@@ -335,131 +358,165 @@ function getKillIcon(kill){
  * @param {Death} death
  * @returns {$ItemStack_}
  */
-function getDeathIcon(death){
+function getDeathIcon(death) {
   let defaultLore = [
     [
-      {text:"Position XYZ: ", color:"gray", italic:false},
-      {text:death.position.join(" "), color:"gold", italic:false},
+      { text: "Position XYZ: ", color: "gray", italic: false },
+      { text: death.position.join(" "), color: "gold", italic: false },
     ],
-    [ {text:""}],
+    [{ text: "" }],
     [
-      {text:getRelativeTimePast(death.timestamp), color:"gray", italic:false},
-    ]
+      {
+        text: getRelativeTimePast(death.timestamp),
+        color: "gray",
+        italic: false,
+      },
+    ],
   ];
   let displayComponent = "{}";
-  switch(death.source_type){
+  switch (death.source_type) {
     case "mob":
       defaultLore.unshift([
-        {text:"Source: ", color:"gray", italic:false},
-        {text:cleanIDToName(death.source_entity), color:"gold", italic:false}
-      ])
-      displayComponent = textDisplayComponent([
+        { text: "Source: ", color: "gray", italic: false },
         {
-          text:`${capitalizeFirstLetters(death.source_type)}`,
-          italic:false,
-          color:"red"
-        }
-      ], defaultLore);
+          text: cleanIDToName(death.source_entity),
+          color: "gold",
+          italic: false,
+        },
+      ]);
+      displayComponent = textDisplayComponent(
+        [
+          {
+            text: `${capitalizeFirstLetters(death.source_type)}`,
+            italic: false,
+            color: "red",
+          },
+        ],
+        defaultLore
+      );
       // tood get the spawn egg
       return Item.of(`${death.source_entity}_spawn_egg[${displayComponent}]`);
     case "fall":
-      displayComponent = textDisplayComponent([
-        {
-          text:`${capitalizeFirstLetters(death.source_type)}`,
-          italic:false,
-          color:"white"
-        }
-      ], defaultLore);
+      displayComponent = textDisplayComponent(
+        [
+          {
+            text: `${capitalizeFirstLetters(death.source_type)}`,
+            italic: false,
+            color: "white",
+          },
+        ],
+        defaultLore
+      );
       return Item.of(`minecraft:feather[${displayComponent}]`);
     case "drown":
-      displayComponent = textDisplayComponent([
-        {
-          text:`${capitalizeFirstLetters(death.source_type)}`,
-          italic:false,
-          color:"aqua"
-        }
-      ], defaultLore);
+      displayComponent = textDisplayComponent(
+        [
+          {
+            text: `${capitalizeFirstLetters(death.source_type)}`,
+            italic: false,
+            color: "aqua",
+          },
+        ],
+        defaultLore
+      );
       return Item.of(`minecraft:water_bucket[${displayComponent}]`);
     case "lava":
-      displayComponent = textDisplayComponent([
-        {
-          text:`${capitalizeFirstLetters(death.source_type)}`,
-          italic:false,
-          color:"red"
-        }
-      ], defaultLore);
+      displayComponent = textDisplayComponent(
+        [
+          {
+            text: `${capitalizeFirstLetters(death.source_type)}`,
+            italic: false,
+            color: "red",
+          },
+        ],
+        defaultLore
+      );
       return Item.of(`minecraft:lava_bucket[${displayComponent}]`);
     case "inFire":
-      displayComponent = textDisplayComponent([
-        {
-          text:`Fire`,
-          italic:false,
-          color:"red"
-        }
-      ], defaultLore);
+      displayComponent = textDisplayComponent(
+        [
+          {
+            text: `Fire`,
+            italic: false,
+            color: "red",
+          },
+        ],
+        defaultLore
+      );
       return Item.of(`minecraft:blaze_powder[${displayComponent}]`);
     case "inWall":
-      displayComponent = textDisplayComponent([
-        {
-          text:`Suffocated`,
-          italic:false,
-          color:"gray"
-        }
-      ], defaultLore);
+      displayComponent = textDisplayComponent(
+        [
+          {
+            text: `Suffocated`,
+            italic: false,
+            color: "gray",
+          },
+        ],
+        defaultLore
+      );
       return Item.of(`minecraft:sand[${displayComponent}]`);
     case "outOfWorld":
-      displayComponent = textDisplayComponent([
-        {
-          text:`Fell out of World`,
-          italic:false,
-          color:"dark_gray"
-        }
-      ], defaultLore);
+      displayComponent = textDisplayComponent(
+        [
+          {
+            text: `Fell out of World`,
+            italic: false,
+            color: "dark_gray",
+          },
+        ],
+        defaultLore
+      );
       return Item.of(`minecraft:ender_pearl[${displayComponent}]`);
     case "freeze":
-      displayComponent = textDisplayComponent([
-        {
-          text:`Frozen`,
-          italic:false,
-          color:"aqua"
-        }
-      ], defaultLore);
+      displayComponent = textDisplayComponent(
+        [
+          {
+            text: `Frozen`,
+            italic: false,
+            color: "aqua",
+          },
+        ],
+        defaultLore
+      );
       return Item.of(`minecraft:packed_ice[${displayComponent}]`);
     default:
-      displayComponent = textDisplayComponent([
-        {
-          text:`${capitalizeFirstLetters(death.source_type)}`,
-          italic:false,
-          color:"red"
-        }
-      ], defaultLore);
+      displayComponent = textDisplayComponent(
+        [
+          {
+            text: `${capitalizeFirstLetters(death.source_type)}`,
+            italic: false,
+            color: "red",
+          },
+        ],
+        defaultLore
+      );
       return Item.of(`minecraft:skeleton_skull[${displayComponent}]`);
   }
 }
 
-PlayerEvents.loggedIn(e => {
+PlayerEvents.loggedIn((e) => {
   // Generate an empty file data for them.
   getPlayerData(e.player.uuid);
 
   PLAYER_NAME_MAP.set(e.player.uuid, e.player.name.string);
-}
-);
+});
 
 // Save to file every 250 ticks
-ServerEvents.tick(event => {
+ServerEvents.tick((event) => {
   if (event.server.tickCount % 250 === 0) {
     saveLeaderboard();
     saveGuilds();
   }
-})
+});
 
-ServerEvents.loaded(_ => {
+ServerEvents.loaded((_) => {
   loadLeaderboard();
   loadGuilds();
-})
+});
 
 // Save to file when the server is unloaded
-ServerEvents.unloaded(_ => {
+ServerEvents.unloaded((_) => {
   saveLeaderboard();
-  saveGuilds()
-})
+  saveGuilds();
+});

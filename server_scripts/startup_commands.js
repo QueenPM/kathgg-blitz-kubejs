@@ -4,12 +4,11 @@ const STARTUP_CMDS = [
   "gamerule playersSleepingPercentage 50",
   "gamerule doInsomnia false",
   "gamerule mobGriefing false",
-  "gamerule doFireTick false"
-]
+  "gamerule doFireTick false",
+];
 
-
-ServerEvents.loaded((e)=>{
-  for(const cmd of STARTUP_CMDS){
-    e.server.runCommandSilent(cmd)
+ServerEvents.loaded((e) => {
+  for (const cmd of STARTUP_CMDS) {
+    e.server.runCommandSilent(cmd);
   }
-})
+});

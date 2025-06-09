@@ -1,17 +1,15 @@
-
-
 /**
  * Returns the ItemStack of the player's head.
  * @param {string} playerName
  * @returns {$ItemStack_}
  */
-function getPlayerHead(playerName){
+function getPlayerHead(playerName) {
   return Item.of("minecraft:player_head", `{SkullOwner:"${playerName}"}`);
 }
 
 /**
  * Returns a number with commas in string format.
- * @param {number} x 
+ * @param {number} x
  * @returns {string}
  */
 function numbersWithCommas(x) {
@@ -20,11 +18,14 @@ function numbersWithCommas(x) {
 
 /**
  * Capitalises the first letter of each word in a string
- * @param string} string 
+ * @param string} string
  * @returns {string}
  */
 function capitalizeFirstLetters(string) {
-  return string.split(" ").map(s => s[0].toUpperCase() + s.slice(1)).join(" ");
+  return string
+    .split(" ")
+    .map((s) => s[0].toUpperCase() + s.slice(1))
+    .join(" ");
 }
 
 /**
@@ -41,14 +42,14 @@ function timeToString(ms) {
   if (days > 0) text += `${days}d `;
   if (hours > 0) text += `${hours % 24}h `;
   if (minutes > 0) text += `${minutes % 60}m `;
-  
+
   text += `${seconds % 60}s`;
   return text;
 }
 
 /**
  * Returns a string with the relative time to timestamp.
- * @param {number} timestamp 
+ * @param {number} timestamp
  * @returns {string}
  */
 function getRelativeTimePast(timestamp) {
@@ -71,7 +72,7 @@ function getRelativeTimePast(timestamp) {
 
 /**
  * Returns a string with the relative time to timestamp.
- * @param {number} timestamp 
+ * @param {number} timestamp
  * @returns {string}
  */
 function getRelativeTimeFuture(timestamp) {
@@ -94,21 +95,32 @@ function getRelativeTimeFuture(timestamp) {
 
 /**
  * Turns an item ID into a human-readable name.
- * @param {string} string 
+ * @param {string} string
  * @returns {string}
  */
 function cleanIDToName(string) {
-  if (typeof string !== 'string') { string = string.toString(); }
-  return string.split(":").slice(1).join("").replace(/_/g, " ").split(" ").map(s => s.substring(0, 1).toUpperCase() + s.slice(1)).join(" ");
+  if (typeof string !== "string") {
+    string = string.toString();
+  }
+  return string
+    .split(":")
+    .slice(1)
+    .join("")
+    .replace(/_/g, " ")
+    .split(" ")
+    .map((s) => s.substring(0, 1).toUpperCase() + s.slice(1))
+    .join(" ");
 }
 
 /**
  * Turns an item name into a potential ID
- * @param {string} string 
+ * @param {string} string
  * @returns {string}
  */
 function nameToId(string) {
-  if (typeof string !== 'string') { string = string.toString(); }
+  if (typeof string !== "string") {
+    string = string.toString();
+  }
   return string.replace(/ /g, "_").toLowerCase();
 }
 
@@ -117,27 +129,32 @@ let server = null;
 
 /**
  * Sends a global message to all players. Used to debug.
- * @param {string} text 
- * @returns 
+ * @param {string} text
+ * @returns
  */
-function print(text){
-  if(!server) return;
+function print(text) {
+  if (!server) return;
   server.tell(text);
 }
 
 ServerEvents.tick((e) => {
-  if(server) return;
+  if (server) return;
   server = e.server;
-  console.log('SERVER LOADEDDDDDDDDDDDDDDDDDDDD')
+  console.log("SERVER LOADEDDDDDDDDDDDDDDDDDDDD");
 });
 /**
  * Converts an ItemStack to a chat component to be used in tellraw
- * @param {$ItemStack_} item 
+ * @param {$ItemStack_} item
  * @returns {string}
  */
-function itemToChatComponent(item){
-  if(item.id === "minecraft:air") return null;
-  return item.toJson().toString().replace("\"item\"", "\"id\"").replace("\"count\"", "\"Count\"").replace("nbt", "tag");
+function itemToChatComponent(item) {
+  if (item.id === "minecraft:air") return null;
+  return item
+    .toJson()
+    .toString()
+    .replace('"item"', '"id"')
+    .replace('"count"', '"Count"')
+    .replace("nbt", "tag");
 }
 
 /**
@@ -151,24 +168,23 @@ function itemToChatComponent(item){
  * @property {boolean} obfuscated
  */
 
-
 /**
  * Returns a JSON string to be used in the component array
- * @param {TextComponent[]} name 
- * @param {TextComponent[][]} lore 
+ * @param {TextComponent[]} name
+ * @param {TextComponent[][]} lore
  */
 function textDisplayComponent(name, lore) {
   let components = [];
-  
+
   if (name && name.length > 0) {
     components.push(`custom_name='["",${JSON.stringify(name)}]'`);
   }
 
   if (lore && lore.length > 0) {
-    let loreLines = lore.map(line => `'["",${JSON.stringify(line)}]'`);
+    let loreLines = lore.map((line) => `'["",${JSON.stringify(line)}]'`);
     components.push(`lore=[${loreLines.join(",")}]`);
   }
-  
+
   return components.join(",");
 }
 
@@ -197,12 +213,12 @@ const $ChatFormatting = Java.loadClass("net.minecraft.ChatFormatting");
 
 /**
  * Flattens an Array of Text Component into a string and adds color codes
- * @param {TextComponent[]} textComponents 
+ * @param {TextComponent[]} textComponents
  * @returns {string}
  */
-function flattenTextComponent(textComponents){
+function flattenTextComponent(textComponents) {
   let resultString = "";
-  for(const component of textComponents){
+  for (const component of textComponents) {
     let formattingCode = "";
     if (component.color) {
       try {
@@ -221,26 +237,38 @@ function flattenTextComponent(textComponents){
     // Append formatting codes for boolean styles if they are true
     if (component.bold) formattingCode += $ChatFormatting.BOLD.toString();
     if (component.italic) formattingCode += $ChatFormatting.ITALIC.toString();
-    if (component.underlined) formattingCode += $ChatFormatting.UNDERLINE.toString();
-    if (component.strikethrough) formattingCode += $ChatFormatting.STRIKETHROUGH.toString();
-    if (component.obfuscated) formattingCode += $ChatFormatting.OBFUSCATED.toString();
-    
+    if (component.underlined)
+      formattingCode += $ChatFormatting.UNDERLINE.toString();
+    if (component.strikethrough)
+      formattingCode += $ChatFormatting.STRIKETHROUGH.toString();
+    if (component.obfuscated)
+      formattingCode += $ChatFormatting.OBFUSCATED.toString();
+
     resultString += formattingCode + component.text;
-    
+
     // Add reset code if there was any formatting to prevent color bleed to next component
     // unless the next component also defines a color.
     // This is a common practice but might need adjustment based on how you build your components.
     if (formattingCode) {
-        // Check if it's not the last component or if the next component doesn't have its own color
-        let currentIndex = textComponents.indexOf(component);
-        if (currentIndex < textComponents.length - 1) {
-            let nextComponent = textComponents[currentIndex + 1];
-            if (!nextComponent.color && (component.color || component.bold || component.italic || component.underlined || component.strikethrough || component.obfuscated)) {
-                 resultString += $ChatFormatting.RESET.toString();
-            }
-        } else { // For the last component, if it had formatting, reset at the very end.
-            resultString += $ChatFormatting.RESET.toString();
+      // Check if it's not the last component or if the next component doesn't have its own color
+      let currentIndex = textComponents.indexOf(component);
+      if (currentIndex < textComponents.length - 1) {
+        let nextComponent = textComponents[currentIndex + 1];
+        if (
+          !nextComponent.color &&
+          (component.color ||
+            component.bold ||
+            component.italic ||
+            component.underlined ||
+            component.strikethrough ||
+            component.obfuscated)
+        ) {
+          resultString += $ChatFormatting.RESET.toString();
         }
+      } else {
+        // For the last component, if it had formatting, reset at the very end.
+        resultString += $ChatFormatting.RESET.toString();
+      }
     }
   }
   return resultString;

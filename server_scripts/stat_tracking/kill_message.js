@@ -32,10 +32,13 @@ EntityEvents.death((event) => {
     tellRawComponents.push({ text: "☠ ", color: "white" });
 
     if (event.entity?.username === killerPlayer?.username) {
-      tellRawComponents.push(getPlayerChatComponent(deadPlayer || event.entity), {
-        text: " has killed themselves",
-        color: "gray",
-      });
+      tellRawComponents.push(
+        getPlayerChatComponent(deadPlayer || event.entity),
+        {
+          text: " has killed themselves",
+          color: "gray",
+        }
+      );
     } else {
       let deathMessage = event.source
         .getLocalizedDeathMessage(event.entity)
@@ -44,10 +47,10 @@ EntityEvents.death((event) => {
 
       for (const msg of deathMessage) {
         if (msg == deadPlayer.username) {
-          tellRawComponents = tellRawComponents.concat(getPlayerNamePlate(deadPlayer || event.entity))
-          tellRawComponents.push(
-            { text: " " }
+          tellRawComponents = tellRawComponents.concat(
+            getPlayerNamePlate(deadPlayer || event.entity)
           );
+          tellRawComponents.push({ text: " " });
           continue;
         }
 
@@ -98,14 +101,14 @@ EntityEvents.death((event) => {
     timestamp: Date.now(),
   });
 
-  tellRawComponents.push(
-    { text: "🏹 ", color: "dark_red" },
+  tellRawComponents.push({ text: "🏹 ", color: "dark_red" });
+  tellRawComponents = tellRawComponents.concat(
+    getPlayerNamePlate(killerPlayer)
   );
-  tellRawComponents = tellRawComponents.concat(getPlayerNamePlate(killerPlayer))
-  tellRawComponents.push(
-    { text: " has slain ", color: "gray" }
-  )
-  tellRawComponents = tellRawComponents.concat(getPlayerNamePlate(deadPlayer || event.entity))
+  tellRawComponents.push({ text: " has slain ", color: "gray" });
+  tellRawComponents = tellRawComponents.concat(
+    getPlayerNamePlate(deadPlayer || event.entity)
+  );
 
   tellRawComponents.push({ text: ` using `, color: "gray" });
 
@@ -127,7 +130,7 @@ EntityEvents.death((event) => {
       color: "dark_purple",
       hoverEvent: { action: "show_item", contents: glyphs.toJson() },
     });
-  } else if(weaponUsed.id !== "minecraft:air"){
+  } else if (weaponUsed.id !== "minecraft:air") {
     // Get the Mainhand Weapon
     let weaponName = weaponUsed.getDisplayName().getString();
     weaponName = weaponName.substring(1, weaponName.length() - 1);
@@ -136,7 +139,7 @@ EntityEvents.death((event) => {
       text: weaponName,
       hoverEvent: { action: "show_item", contents: weaponUsed.toJson() },
     });
-  }else{
+  } else {
     // Using Fists
     tellRawComponents.push({
       text: "Fists",
@@ -167,7 +170,7 @@ EntityEvents.death((event) => {
 
   event.server.runCommandSilent(tellrawcmd);
 
-  announceKillStreak(killerPlayer, playerData)
+  announceKillStreak(killerPlayer, playerData);
 
   // In case Keep Inventory is ON! Drop All (Canceling event)
   if (deadPlayer && !event.server.getGameRules().get("keepInventory"))

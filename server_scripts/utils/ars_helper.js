@@ -1,12 +1,16 @@
-let $SpellSlotMap = Java.loadClass("com.hollingsworth.arsnouveau.api.spell.SpellSlotMap");
-let $SpellCaster = Java.loadClass("com.hollingsworth.arsnouveau.api.spell.SpellCaster");
+let $SpellSlotMap = Java.loadClass(
+  "com.hollingsworth.arsnouveau.api.spell.SpellSlotMap"
+);
+let $SpellCaster = Java.loadClass(
+  "com.hollingsworth.arsnouveau.api.spell.SpellCaster"
+);
 
 const ARS_SPELLBOOK_IDS = [
   "ars_nouveau:creative_spell_book",
   "ars_nouveau:novice_spell_book",
   "ars_nouveau:apprentice_spell_book",
   "ars_nouveau:archmage_spell_book",
-]
+];
 
 /**
  * @typedef {"Form" | "Augment" | "Effect"} SpellPartType
@@ -18,12 +22,12 @@ const ARS_SPELLBOOK_IDS = [
 const TYPE_INDEX = {
   1: "Form",
   5: "Augment",
-  10: "Effect"
-}
+  10: "Effect",
+};
 
 /**
  * Returns the name of the spell part type
- * @param {number} typeIndex 
+ * @param {number} typeIndex
  * @returns {string}
  */
 function getSpellPartTypeName(typeIndex) {
@@ -73,14 +77,14 @@ function getSelectedSpell(spellbook) {
           item: spellPart.glyphItem,
           typeIndex: spellPart.getTypeIndex(),
           type: getSpellPartTypeName(spellPart.getTypeIndex()),
-          tier: spellPart.getConfigTier().value
+          tier: spellPart.getConfigTier().value,
         });
       }
       return {
         name: spell.name(),
         glyphs: spell.displayString,
-        recipe: recipe
-      }
+        recipe: recipe,
+      };
     }
   }
 
@@ -89,8 +93,8 @@ function getSelectedSpell(spellbook) {
 
 /**
  * Returns true if the item is a spellbook
- * @param {$ItemStack_} item 
- * @returns 
+ * @param {$ItemStack_} item
+ * @returns
  */
 function isItemSpellbook(item) {
   for (let id of ARS_SPELLBOOK_IDS) {
@@ -119,7 +123,11 @@ function colorSpellGlyphs(glyphs) {
       currentMultiplier++;
     } else {
       if (currentMultiplier > 1) {
-        components.push({ text: ` x${currentMultiplier}`, color: getPartTypeColor(glyphs[i-1].type), italic: false });
+        components.push({
+          text: ` x${currentMultiplier}`,
+          color: getPartTypeColor(glyphs[i - 1].type),
+          italic: false,
+        });
         currentMultiplier = 1;
       }
       if (i > 0) {
@@ -131,7 +139,11 @@ function colorSpellGlyphs(glyphs) {
 
   // Handle the case where the last glyph is part of a repeated sequence
   if (currentMultiplier > 1) {
-    components.push({ text: ` x${currentMultiplier}`, color: getPartTypeColor(glyphs[glyphs.length-1].type), italic: false });
+    components.push({
+      text: ` x${currentMultiplier}`,
+      color: getPartTypeColor(glyphs[glyphs.length - 1].type),
+      italic: false,
+    });
   }
 
   return components;
@@ -139,9 +151,9 @@ function colorSpellGlyphs(glyphs) {
 
 /**
  * Gets the color of the spell part type and returns the color name
- * @param {SpellPartType} type 
+ * @param {SpellPartType} type
  */
-function getPartTypeColor(type){
+function getPartTypeColor(type) {
   switch (type) {
     case "Form":
       return "dark_purple";
@@ -156,10 +168,10 @@ function getPartTypeColor(type){
 
 /**
  * Gets the player's favourite spell
- * @param {Kill[]} kills 
+ * @param {Kill[]} kills
  * @returns {favouriteSpellCount}
  */
-function getFavouriteSpell(kills){
+function getFavouriteSpell(kills) {
   /**
    * @typedef {Object} favouriteSpellCount
    * @property {number} count
@@ -169,19 +181,19 @@ function getFavouriteSpell(kills){
 
   /** @type {favouriteSpellCount[]} */
   let spells = [];
-  for(let i = 0; i < kills.length; i++){
+  for (let i = 0; i < kills.length; i++) {
     let kill = kills[i];
     let weapon = Item.of(`${kill.weapon.id}${kill.weapon.components}`);
-    if(!isItemSpellbook(weapon)) continue;
+    if (!isItemSpellbook(weapon)) continue;
     let spell = getSelectedSpell(weapon);
-    if(!spell) continue;
+    if (!spell) continue;
 
     let found = false;
-    for(let j = 0; j < spells.length; j++){
-      if(spells[j].spell.glyphs === spell.glyphs){
+    for (let j = 0; j < spells.length; j++) {
+      if (spells[j].spell.glyphs === spell.glyphs) {
         spells[j].count++;
         found = true;
-        if(kill.timestamp > spells[j].timestamp){
+        if (kill.timestamp > spells[j].timestamp) {
           spells[j].timestamp = kill.timestamp;
           spells[j].spell.name = spell.name;
         }
@@ -189,20 +201,20 @@ function getFavouriteSpell(kills){
       }
     }
 
-    if(!found){
+    if (!found) {
       spells.push({
         count: 1,
         spell: spell,
-        timestamp: kill.timestamp
+        timestamp: kill.timestamp,
       });
     }
   }
 
-  if(spells.length === 0) return null;
+  if (spells.length === 0) return null;
 
   let favourite = spells[0];
-  for(let i = 1; i < spells.length; i++){
-    if(spells[i].count > favourite.count){
+  for (let i = 1; i < spells.length; i++) {
+    if (spells[i].count > favourite.count) {
       favourite = spells[i];
     }
   }

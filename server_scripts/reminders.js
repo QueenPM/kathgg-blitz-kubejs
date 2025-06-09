@@ -28,18 +28,18 @@ const REMINDER_TIMER = 1200 * 15; // 1200 ticks = 1 minute
 
 /**
  * Tells the player the rules of the server
- * @param {$Player} player 
+ * @param {$Player} player
  */
-function tellPlayerRules(player){
+function tellPlayerRules(player) {
   player.tell("§4Rules§8 of the Server!");
   for (let i = 0; i < RULES.length; i++) {
-    player.tell(`§4${i+1})§8 ${RULES[i]}`);
+    player.tell(`§4${i + 1})§8 ${RULES[i]}`);
   }
   player.tell("§8Use /rules to view this again.");
 }
 
-ServerEvents.tick(event => {
-  if(!FEATURE_REMINDERS) return;
+ServerEvents.tick((event) => {
+  if (!FEATURE_REMINDERS) return;
   if (event.currentTick % REMINDER_TIMER === 0) {
     let newReminderIndex;
     do {
@@ -52,22 +52,22 @@ ServerEvents.tick(event => {
   }
 });
 
-PlayerEvents.loggedIn(event => {
-  if(FEATURE_RULES){
-    tellPlayerRules(event.player)
+PlayerEvents.loggedIn((event) => {
+  if (FEATURE_RULES) {
+    tellPlayerRules(event.player);
   }
-  if(FEATURE_REMINDERS){
+  if (FEATURE_REMINDERS) {
     let reminderIndex = Math.floor(Math.random() * REMINDERS.length);
     event.player.tell("§bⒾ§8 " + REMINDERS[reminderIndex]);
   }
 });
 
-ServerEvents.commandRegistry(event => {
-  const { commands: Commands, arguments: Arguments } = event
+ServerEvents.commandRegistry((event) => {
+  const { commands: Commands, arguments: Arguments } = event;
 
-  if(FEATURE_RULES){
-    event.register(Commands.literal('rules')
-      .executes(c => {
+  if (FEATURE_RULES) {
+    event.register(
+      Commands.literal("rules").executes((c) => {
         /**
          * @type {$Player}
          */
@@ -75,12 +75,12 @@ ServerEvents.commandRegistry(event => {
         tellPlayerRules(player);
         return 1;
       })
-    )
+    );
   }
 
-  if(FEATURE_REMINDERS){
-    event.register(Commands.literal('tips')
-      .executes(c => {
+  if (FEATURE_REMINDERS) {
+    event.register(
+      Commands.literal("tips").executes((c) => {
         /**
          * @type {$Player}
          */
@@ -91,6 +91,6 @@ ServerEvents.commandRegistry(event => {
         }
         return 1;
       })
-    )
+    );
   }
-})
+});

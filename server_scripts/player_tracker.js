@@ -1,15 +1,10 @@
 // CONSTANTS
 
-let $Vec3 = Java.loadClass("net.minecraft.world.phys.Vec3")
-
+let $Vec3 = Java.loadClass("net.minecraft.world.phys.Vec3");
 let $UUID = Java.loadClass("java.util.UUID");
-
 let $ServerPlayer = Java.loadClass("net.minecraft.server.level.ServerPlayer");
-
 let $ItemStack = Java.loadClass("net.minecraft.world.item.ItemStack");
-
 let $Inventory = Java.loadClass("net.minecraft.world.entity.player.Inventory");
-
 let $Entity = Java.loadClass("net.minecraft.world.entity.Entity");
 
 // Tracker Config
@@ -119,10 +114,10 @@ function getTrackableEntities(player) {
         continue;
       }
 
-      if(entity.player){
+      if (entity.player) {
         // Ignore players in ghost mode
-        if(GHOST_USED.get(`${entity.uuid}`)) continue;
-        if(entity.uuid.toString() === player.uuid.toString()) continue;
+        if (GHOST_USED.get(`${entity.uuid}`)) continue;
+        if (entity.uuid.toString() === player.uuid.toString()) continue;
         trackableEntities.push(entity);
       }
     }
@@ -204,22 +199,24 @@ function getTrackerFromPlayer(player) {
   let tracker = null;
   let slot = 0;
   for (let item of player.inventory.items) {
-    if(item.id === "minecraft:air") continue;
+    if (item.id === "minecraft:air") continue;
     if (isItemTracker(item)) {
       tracker = item;
       break;
     }
-    slot++
+    slot++;
   }
-  return {slot: slot, tracker:tracker};
+  return { slot: slot, tracker: tracker };
 }
 
 /**
  * Deviates block position
  * @param {$BlockPos_} position
  */
-function deviatePosition(position){
-  let deviation = Math.floor(Math.random() * (DEVIATION_MAX - DEVIATION_MIN + 1) + DEVIATION_MIN);
+function deviatePosition(position) {
+  let deviation = Math.floor(
+    Math.random() * (DEVIATION_MAX - DEVIATION_MIN + 1) + DEVIATION_MIN
+  );
   let xPercent = Math.random() * 0.3;
   let zPercent = Math.random() * 0.3;
   let yPercent = 1 - xPercent - zPercent;
@@ -233,9 +230,9 @@ function deviatePosition(position){
   let z = position.z + zDev;
   let y = position.y + yDev;
 
-  let vec = new $Vec3(x, y, z)
+  let vec = new $Vec3(x, y, z);
 
-  return vec
+  return vec;
 }
 
 /**
@@ -246,10 +243,12 @@ function deviatePosition(position){
  * @param {number} trackerSlotInt
  */
 function updateTracker(player, entity, newTrackerData, trackerSlotInt) {
-  if(typeof trackerSlotInt == "undefined") return;
+  if (typeof trackerSlotInt == "undefined") return;
 
-  if(GHOST_USED.get(`${entity.uuid}`)){
-    player.server.runCommandSilent(`tellraw ${player.username} [{"text":"You cannot track ${entity.username} because they are Ghosted", "color":"gray"}]`)
+  if (GHOST_USED.get(`${entity.uuid}`)) {
+    player.server.runCommandSilent(
+      `tellraw ${player.username} [{"text":"You cannot track ${entity.username} because they are Ghosted", "color":"gray"}]`
+    );
     return;
   }
 
@@ -322,8 +321,12 @@ function updateTracker(player, entity, newTrackerData, trackerSlotInt) {
   player.inventory.setItem(trackerSlotInt, Item.of(newCompassString));
   player.playNotifySound("minecraft:block.note_block.bell", "master", 1, 1);
 
-  if(entity.player){
-    sendPlayerWarning(entity, "You're being Tracked!", "Someone has pinged your location.")
+  if (entity.player) {
+    sendPlayerWarning(
+      entity,
+      "You're being Tracked!",
+      "Someone has pinged your location."
+    );
   }
 }
 
@@ -638,7 +641,9 @@ function activateGhost(player) {
     )}, {"text":" has activated Ghost Organisation", "color":"gray"}]}`
   );
 
-  player.server.runCommandSilent(`bossbar remove ghost_${player.username.toLowerCase()}`);
+  player.server.runCommandSilent(
+    `bossbar remove ghost_${player.username.toLowerCase()}`
+  );
   player.server.runCommandSilent(
     `bossbar add ghost_${player.username.toLowerCase()} [{"text":"Ghost Duration: ${timeToString(
       GHOST_DURATION * 1000
@@ -655,13 +660,14 @@ function activateGhost(player) {
 }
 
 // Remove all Boss Bars on load
-ServerEvents.loaded(e => {
+ServerEvents.loaded((e) => {
   let players = getLeaderboard();
-  for(const player of players){
-    e.server.runCommandSilent(`bossbar remove ghost_${player.name.toLowerCase()}`);
-
+  for (const player of players) {
+    e.server.runCommandSilent(
+      `bossbar remove ghost_${player.name.toLowerCase()}`
+    );
   }
-})
+});
 
 ServerEvents.tick((e) => {
   if (e.server.tickCount % 20 != 0) return;
@@ -684,13 +690,15 @@ ServerEvents.tick((e) => {
       );
     } else {
       GHOST_USED.delete(k);
-      player = e.server.getPlayer(k)
-      e.server.runCommandSilent(`bossbar remove ghost_${player.username.toLowerCase()}`);
+      player = e.server.getPlayer(k);
       e.server.runCommandSilent(
-    `tellraw @a {"text":"", "extra": [${JSON.stringify(
-      getPlayerChatComponent(player)
-    )}, {"text":" has left Ghost Organisation", "color":"gray"}]}`
-  );
+        `bossbar remove ghost_${player.username.toLowerCase()}`
+      );
+      e.server.runCommandSilent(
+        `tellraw @a {"text":"", "extra": [${JSON.stringify(
+          getPlayerChatComponent(player)
+        )}, {"text":" has left Ghost Organisation", "color":"gray"}]}`
+      );
     }
   });
 });
@@ -723,27 +731,33 @@ let TrackerMenu = new Menu(
             menu.player.getDistance(entity.position())
           );
 
-          let ghosted = GHOST_USED.get(`${entity.uuid}`)
+          let ghosted = GHOST_USED.get(`${entity.uuid}`);
 
-          let distance = deviatePosition(entity.position()).distanceTo(menu.player.position()).toFixed(2)
+          let distance = deviatePosition(entity.position())
+            .distanceTo(menu.player.position())
+            .toFixed(2);
 
           menu.gui.slot(column, 0, (slot) => {
             slot.item = createMenuButton({
               title: [
-                { text: `${unobfuscatedString}`, obfuscated: ghosted},
+                { text: `${unobfuscatedString}`, obfuscated: ghosted },
                 { text: `${obfuscatedString}`, obfuscated: true },
               ],
               description: [
                 [
                   {
-                    text: ghosted ? "§7Dimension: §8???" : `§7Dimension: ${coloredDimension(
-                      cleanIDToName(entity.level.dimension)
-                    )}`,
+                    text: ghosted
+                      ? "§7Dimension: §8???"
+                      : `§7Dimension: ${coloredDimension(
+                          cleanIDToName(entity.level.dimension)
+                        )}`,
                   },
                 ],
                 [
                   {
-                    text: ghosted ? "§7Distance: §8???" : `§7Distance: §f${distance} blocks`,
+                    text: ghosted
+                      ? "§7Distance: §8???"
+                      : `§7Distance: §f${distance} blocks`,
                   },
                 ],
                 [{ text: `Click to start tracking` }],

@@ -37,23 +37,26 @@ ServerEvents.commandRegistry((event) => {
             return 1;
           }
 
-          let patterns = []
+          let patterns = [];
           // Remove the tooltips. Create a new item
           /** @type {$Tag} */
           let components = heldItem.toNBT()["components"];
           if (components) {
             let parsedPatterns = components["minecraft:banner_patterns"];
             if (parsedPatterns) {
-              console.log(parsedPatterns)
-              for(const pattern of parsedPatterns){
-                console.log(JSON.stringify(pattern.get("pattern")))
-                patterns.push({ pattern: pattern.get("pattern").getAsString(), color: pattern.get("color").getAsString() })
+              console.log(parsedPatterns);
+              for (const pattern of parsedPatterns) {
+                console.log(JSON.stringify(pattern.get("pattern")));
+                patterns.push({
+                  pattern: pattern.get("pattern").getAsString(),
+                  color: pattern.get("color").getAsString(),
+                });
               }
             }
           }
 
-          console.log(patterns)
-          console.log(JSON.stringify(patterns))
+          console.log(patterns);
+          console.log(JSON.stringify(patterns));
 
           guild.banner = {
             id: heldItem.id,
@@ -126,7 +129,7 @@ function giveBanner(player, amount) {
     return 1;
   }
 
-  console.log(guild.banner)
+  console.log(guild.banner);
 
   // Honestly, this is bad but I cba
 
@@ -141,7 +144,7 @@ function giveBanner(player, amount) {
   }
   let item = `${guild.banner.id}[banner_patterns=${JSON.stringify(patterns)}]`;
 
-  console.log(item)
+  console.log(item);
 
   let banner = Item.of(item);
 
