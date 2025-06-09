@@ -107,22 +107,75 @@ ServerEvents.commandRegistry((event) => {
  */
 function getPlayerItemComponent(player) {
   /** @type {TextComponent} */
-  let name = { text: player.name, italic: false, color: "green" };
+  let name = { text: player.name, italic: false, color: "gold" }; // Changed name color for the item itself
 
   /** @type {TextComponent[]} */
   let lore = [
+    // PvP Stats (Kills, Deaths, KDR)
     {
-      text: `§5☻ ${player.name}§f: §a${player.kills}§f/§4${
-        player.player_deaths
-      } §f(§a${parseFloat(player.kdr).toFixed(2)}§f KDR) §e✦${player.killstreak}`,
+      text: "PvP Stats: ",
+      italic: false,
+      color: "aqua",
+      extra: [
+        { text: `${player.kills}`, color: "green" },
+        { text: " Kills", color: "gray" },
+        { text: " / ", color: "dark_gray" },
+        { text: `${player.player_deaths}`, color: "red" },
+        { text: " Deaths", color: "gray" },
+        { text: " (", color: "dark_gray" },
+        { text: `${parseFloat(player.kdr).toFixed(2)}`, color: "light_purple" },
+        { text: " KDR", color: "gray" },
+        { text: ")", color: "dark_gray" },
+      ],
     },
-    { text: "" },
+    { text: "" }, // Spacer
+
+    // Killstreaks
     {
-      text: `§7◆ Highest Killstreak: §e${player.highest_killstreak}`,
+      text: "Current Killstreak: ",
+      italic: false,
+      color: "gray",
+      extra: [{ text: `${player.killstreak}`, color: "yellow" }],
     },
-    { text: `§7◆ Nemesis: ${getNemesis(player)}` },
-    { text: `§7◆ Victim: ${getVictim(player)}` },
-    { text: `§7◆ Favourite Weapon: §a${getFavouriteWeapon(player)}` },
+    {
+      text: "Highest Killstreak: ",
+      italic: false,
+      color: "gray",
+      extra: [{ text: `${player.highest_killstreak}`, color: "yellow" }],
+    },
+    {
+      text: "Furthest Kill: ",
+      italic: false,
+      color: "gray",
+      extra: [{ text: `${getLongestKill(player)} blocks`, color: "yellow" }],
+    },
+    { text: "" }, // Spacer
+
+    // Combat Relationships
+    {
+      text: "Nemesis: ",
+      italic: false,
+      color: "gray",
+      // getNemesis() returns a string with pre-applied color codes
+      extra: [{ text: `${getNemesis(player)}` }],
+    },
+    {
+      text: "Victim: ",
+      italic: false,
+      color: "gray",
+      // getVictim() returns a string with pre-applied color codes
+      extra: [{ text: `${getVictim(player)}` }],
+    },
+    { text: "" }, // Spacer
+
+    // Preferences
+    {
+      text: "Favourite Weapon: ",
+      italic: false,
+      color: "gray",
+      // getFavouriteWeapon() returns a string with pre-applied color codes
+      extra: [{ text: `${getFavouriteWeapon(player)}` }],
+    },
   ];
 
   let favSpell = getFavouriteSpell(player.kill_history);
@@ -130,27 +183,53 @@ function getPlayerItemComponent(player) {
     if (favSpell.spell.name) {
       lore.push(
         {
-          text: `§7◆ Favourite Spell: §a${favSpell.spell.name} §f(§a${favSpell.count}§f)`,
+          text: "Favourite Spell: ",
+          italic: false,
+          color: "gray",
+          extra: [
+            { text: favSpell.spell.name, color: "aqua" },
+            { text: " (" },
+            { text: `${favSpell.count}`, color: "green" },
+            { text: " uses)", color: "gray" },
+          ],
         },
         {
-          text: `§7◆ Glyphs: §a${flattenTextComponent(
-            colorSpellGlyphs(favSpell.spell.recipe)
-          )}`,
+          text: "  Glyphs: ", // Indented
+          italic: false,
+          color: "gray",
+          // flattenTextComponent(colorSpellGlyphs(...)) returns a string with pre-applied color codes
+          extra: [
+            {
+              text: `${flattenTextComponent(
+                colorSpellGlyphs(favSpell.spell.recipe)
+              )}`,
+            },
+          ],
         }
       );
     } else {
+      // Fallback if spell name isn't available
       lore.push({
-        text: `§7◆ Favourite Spell: §a${favSpell.spell.glyphs} §f(§a${favSpell.count}§f)`,
+        text: "Favourite Spell: ",
+        italic: false,
+        color: "gray",
+        extra: [
+          {
+            text: `${favSpell.spell.glyphs}`, // Glyphs in Dark Aqua (or as per flattenTextComponent if used)
+            color: "dark_aqua", // Assuming glyphs string doesn't have own colors here
+          },
+          { text: " (" },
+          { text: `${favSpell.count}`, color: "green" },
+          { text: " uses)", color: "gray" },
+        ],
       });
     }
   }
 
-  lore.push({ text: `§7◆ Furthest Kill: §e${getLongestKill(player)} blocks` });
-
   return {
-    custom_name: name,
-    lore: lore,
-    profile: player.name,
+    custom_name: name, // For the item's name (e.g., Player Head)
+    lore: lore,        // Lore for the item tooltip
+    profile: player.name, // For player head texture
   };
 }
 

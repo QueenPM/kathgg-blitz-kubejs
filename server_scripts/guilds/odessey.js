@@ -172,14 +172,69 @@ function getGuildItemComponent(guild, playerId) {
   };
 
   /** @type {TextComponent[]} */
-  let lore = [
-    {
-      text: "Owner: ",
-      italic: false,
-      color: "yellow",
-      extra: [{ text: `${guild.owner.name}`, color: "white" }],
-    },
-  ];
+  let lore = [];
+
+  if (guild.settings.motd) {
+    lore.push(
+      {
+        text: guild.settings.motd,
+        italic: false,
+        color: "gray",
+      },
+      {
+        text: "",
+      },
+    );
+  }
+
+  // Get the KDR & wealth for guild members.
+  let k = 0;
+  let d = 0;
+  let wealth = 0;
+  for (const member of guild.members) {
+    let data = getPlayerData(member.id);
+    if (!data) continue;
+    k += data.kills;
+    d += data.player_deaths;
+    wealth += data.credits;
+  }
+  let kdr = d === 0 ? (k > 0 ? k : 0) : k / d;
+
+  // Guild PvP Stats (Kills, Deaths, KDR)
+  lore.push({
+    text: "PvP Stats: ",
+    italic: false,
+    color: "aqua",
+    extra: [
+      { text: `${k}`, color: "green" },
+      { text: " Kills", color: "gray" },
+      { text: " / ", color: "dark_gray" },
+      { text: `${d}`, color: "red" },
+      { text: " Deaths", color: "gray" },
+      { text: " (", color: "dark_gray" },
+      { text: `${kdr.toFixed(2)}`, color: "light_purple" }, // Formatted KDR
+      { text: " KDR", color: "gray" },
+      { text: ")", color: "dark_gray" },
+    ],
+  });
+
+  // Guild Wealth
+  lore.push({
+    text: "Guild Wealth: ",
+    italic: false,
+    color: "gold",
+    extra: [{ text: `$${numbersWithCommas(wealth)}`, color: "yellow" }],
+  });
+
+  // Divider for Misc Stats
+  lore.push({ text: "" });
+
+  lore.push({
+    text: "Owner: ",
+    italic: false,
+    color: "yellow",
+    extra: [{ text: `${guild.owner.name}`, color: "white" }],
+  });
 
   if (playerId) {
     let gPlayer = guild.members.find((m) => m.id == playerId);
@@ -200,46 +255,8 @@ function getGuildItemComponent(guild, playerId) {
     extra: [{ text: `${guild.members.length}`, color: "white" }],
   });
 
-  // Divider for stats
-  lore.push({ text: "" });
-
-  // Get the KDR & wealth for guild members.
-  let k = 0;
-  let d = 0;
-
-  let wealth = 0;
-  for (const member of guild.members) {
-    let data = getPlayerData(member.id);
-    if (!data) continue;
-    k += data.kills;
-    d += data.player_deaths;
-    wealth += data.credits;
-  }
-  let kdr = d == 0 ? k : k == 0 ? 0 : k / d;
-
-  // Wealth
-  lore.push({
-    text: "Wealth: ",
-    italic: false,
-    color: "yellow",
-    extra: [{ text: `$${numbersWithCommas(wealth)}`, color: "gold" }],
-  });
-  lore.push({
-    text: "KDR: ",
-    italic: false,
-    color: "gray",
-    extra: [
-      { text: `${k}`, color: "green" },
-      { text: `/`, color: "white" },
-      { text: `${d}`, color: "red" },
-      { text: ` (`, color: "white" },
-      { text: `${kdr}`, color: "green" },
-      { text: ` KDR)`, color: "white" },
-    ],
-  });
-
   return {
-    custom_name: JSON.stringify(name),
+    custom_name: JSON.stringify(name), // Ensure 'name' is a single TextComponent, not an array
     lore: lore.map((i) => JSON.stringify(i)),
   };
 }
