@@ -2,10 +2,10 @@
 
 let $ItemStackKJS = Java.loadClass("dev.latvian.mods.kubejs.core.ItemStackKJS");
 
-const KDR_PATH = "kubejs/data/kdr_leaderboard.json";
+const KDR_PATH = "kubejs/data/player_stats.json";
 
 /**
- * @typedef {Object} KDRPlayer
+ * @typedef {Object} PlayerStats
  * @property {string} uuid : UUID of the player
  * @property {string} name : Name of the player
  * @property {number} credits : Credits of the player
@@ -44,8 +44,8 @@ const KDR_PATH = "kubejs/data/kdr_leaderboard.json";
  * @property {Object} components : NBT of the weapon in JSON format.
  */
 
-/** @type {Map<string, KDRPlayer>|null} */
-let KDR_Leaderboard = null;
+/** @type {Map<string, PlayerStats>|null} */
+let PlayerStatsCache = null;
 
 /**
  * Gets the kill weapon ID
@@ -58,30 +58,30 @@ function getKillWeaponID(kill) {
 }
 
 function loadLeaderboard() {
-  KDR_Leaderboard = JsonIO.read(KDR_PATH);
-  if (!KDR_Leaderboard) {
+  PlayerStatsCache = JsonIO.read(KDR_PATH);
+  if (!PlayerStatsCache) {
     JsonIO.write(KDR_PATH, "{}");
   }
-  KDR_Leaderboard = JsonIO.read(KDR_PATH);
+  PlayerStatsCache = JsonIO.read(KDR_PATH);
 }
 
 /**
- * @returns {KDRPlayer[]}
+ * @returns {PlayerStats[]}
  */
 function getLeaderboard() {
-  if (!KDR_Leaderboard) loadLeaderboard();
-  /** @type {KDRPlayer[]} */
+  if (!PlayerStatsCache) loadLeaderboard();
+  /** @type {PlayerStats[]} */
   let array = [];
-  KDR_Leaderboard.forEach((k, v) => {
+  PlayerStatsCache.forEach((k, v) => {
     array.push(v);
   });
   return array;
 }
 
 function saveLeaderboard() {
-  if (!KDR_Leaderboard) loadLeaderboard();
+  if (!PlayerStatsCache) loadLeaderboard();
   syncCreditsWithLightman(server);
-  JsonIO.write("kubejs/data/kdr_leaderboard.json", KDR_Leaderboard);
+  JsonIO.write(KDR_PATH, PlayerStatsCache);
 }
 
 /**
@@ -97,12 +97,12 @@ function addKill(player, kill) {
   playerData.killstreak++;
   playerData.highest_killstreak = Math.max(playerData.highest_killstreak, playerData.killstreak);
   playerData.kill_history.push(kill);
-  let victimData = KDR_Leaderboard.get(kill.uuid);
+  let victimData = PlayerStatsCache.get(kill.uuid);
   if (victimData) {
     victimData.deaths++;
   }
   playerData.kdr = playerData.kills / Math.max(1, playerData.player_deaths);
-  KDR_Leaderboard[player.uuid] = playerData;
+  PlayerStatsCache[player.uuid] = playerData;
 }
 
 /**
@@ -130,7 +130,7 @@ function addDeath(player, source) {
       timestamp: Date.now()
     });
   
-    KDR_Leaderboard[player.uuid] = playerData;
+    PlayerStatsCache[player.uuid] = playerData;
   }catch(e){
     print(e);
   }
@@ -138,11 +138,11 @@ function addDeath(player, source) {
 
 /**
  * @param {$UUID_} uuid - The player to get the data for
- * @returns {KDRPlayer}
+ * @returns {PlayerStats}
  */
 function getPlayerData(uuid) {
-  if (!KDR_Leaderboard) loadLeaderboard();
-  let playerData = KDR_Leaderboard[uuid];
+  if (!PlayerStatsCache) loadLeaderboard();
+  let playerData = PlayerStatsCache[uuid];
   if (!playerData) {
     let playerName = getPlayerName(uuid);
     playerData = {
@@ -158,7 +158,7 @@ function getPlayerData(uuid) {
       kill_history: [],
       death_history: []
     }
-    KDR_Leaderboard[uuid] = playerData;
+    PlayerStatsCache[uuid] = playerData;
   }
 
   // Refresh name if its null

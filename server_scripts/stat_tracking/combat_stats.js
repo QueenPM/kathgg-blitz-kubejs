@@ -1,7 +1,7 @@
 /**
  * @typedef {Object} SortingOption
  * @property {string} display : Display name of the sorting option
- * @property {(a: KDRPlayer, b: KDRPlayer) => number} sort : Sorting function
+ * @property {(a: PlayerStats, b: PlayerStats) => number} sort : Sorting function
  */
 
 /**
@@ -103,7 +103,7 @@ ServerEvents.commandRegistry((event) => {
 
 /**
  * Helper function to construct player information in item form
- * @param {KDRPlayer} player
+ * @param {PlayerStats} player
  */
 function getPlayerItemComponent(player) {
   /** @type {TextComponent} */
@@ -183,7 +183,7 @@ function getPlayerChatComponent(player) {
 
 /**
  * @param {Kill} kill
- * @param {KDRPlayer} killer
+ * @param {PlayerStats} killer
  * @returns {string[]}
  */
 function getKillStats(kill, killer) {
@@ -206,7 +206,7 @@ function getKillStats(kill, killer) {
 
 /**
  * Returns the player that has killed the player the most.
- * @param {KDRPlayer} player
+ * @param {PlayerStats} player
  * @returns {string}
  */
 function getNemesis(player) {
@@ -243,7 +243,7 @@ function getNemesis(player) {
 
 /**
  * Returns the player that the player has killed the most.
- * @param {KDRPlayer} player
+ * @param {PlayerStats} player
  * @returns {string}
  */
 function getVictim(player) {
@@ -274,7 +274,7 @@ function getVictim(player) {
 
 /**
  *
- * @param {KDRPlayer} player
+ * @param {PlayerStats} player
  * @returns
  */
 function getFavouriteWeapon(player) {
@@ -320,7 +320,7 @@ function getFavouriteWeapon(player) {
 }
 
 /**
- * @param {KDRPlayer} player
+ * @param {PlayerStats} player
  */
 function getLongestKill(player) {
   let longestKill = 0;
@@ -463,7 +463,7 @@ let KDAMenu = new Menu(
       load: function (menu, data) {
         if (!data.target) return;
         /**
-         * @type {KDRPlayer}
+         * @type {PlayerStats}
          */
         let statPlayer = data.target;
         let viewType = data?.viewType || "heads";
@@ -592,7 +592,7 @@ let KDAMenu = new Menu(
       load: function (menu, data) {
         if (!data.target) return;
         /**
-         * @type {KDRPlayer}
+         * @type {PlayerStats}
          */
         let statPlayer = data.target;
         let max_rows = 4;

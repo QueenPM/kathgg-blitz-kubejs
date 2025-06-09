@@ -200,7 +200,7 @@ EntityEvents.death((event) => {
 /**
  * Anounces a Killstreak to the server
  * @param {$ServerPlayer_} player
- * @param {KDRPlayer} playerData
+ * @param {PlayerStats} playerData
  */
 function announceKillStreak(player, playerData) {
   if (playerData.killstreak % ANNOUNCE_KILLSTREAK_INTERVAL !== 0) return;
