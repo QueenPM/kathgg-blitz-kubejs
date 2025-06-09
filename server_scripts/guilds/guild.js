@@ -13,7 +13,6 @@ function loadGuilds() {
   for(const g of guildsData.values()){
     GUILDS[g.id] = g
   }
-  console.log(GUILDS)
 }
 
 function saveGuilds() {

@@ -1,4 +1,4 @@
-// priority: 0
+// priority: 1
 
 const MAX_GUILD_NAME_LENGTH = 10;
 
@@ -53,6 +53,7 @@ const $ClaimsManager = Java.loadClass(
 
 /**
  * Helper function to get Guild Data in a clean format with JSDocs
+ * @param {earth.terrarium.odyssey_allies.api.teams.guild.Guild} guild
  * @returns {GuildInformation}
  */
 function getGuildData(guild) {
