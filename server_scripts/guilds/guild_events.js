@@ -22,7 +22,7 @@ ServerEvents.loaded(event => {
     try {
       let guildData = getGuildData(guild);
       // TODO: Add new guild to your GUILDS cache
-      if (guildData) GUILDS[guildData.id] = guildData;
+      saveGuildData(guildData)
     } catch (e) {
       console.error(`KJS ERROR: CreateGuildEvent - Guild ID ${guild ? guild.id() : 'unknown'}: ${e}`);
     }
@@ -52,7 +52,7 @@ ServerEvents.loaded(event => {
     try {
       let guildData = getGuildData(guild);
       console.log(`KJS INFO: GuildChangedEvent - Guild ID: ${guildData.id}, Name: ${guildData.settings.name}}`);
-      if (guildData) GUILDS[guildData.id] = guildData;
+      saveGuildData(guildData)
     } catch (e) {
       console.error(`KJS ERROR: GuildChangedEvent - Guild ID ${guild ? guild.id() : 'unknown'}: ${e}`);
     }
@@ -71,6 +71,7 @@ ServerEvents.loaded(event => {
       // TODO test this
       console.log(`KJS INFO: ModifyGuildMemberEvent - Guild ID: ${guildData.id}, Name: ${guildData.settings.name}, Player UUID: ${playerUUID.toString()}, New Status: ${status.name()}}`);
       console.log(`NEW GUILD DATA FROM EVENT: ${guildData}`)
+      saveGuildData(guildData)
       // if (guildData && GUILDS[guildData.id]) {
       //   const updatedMembersGuildData = getGuildData(guild);
       //   GUILDS[guildData.id].members = updatedMembersGuildData.members;
@@ -92,7 +93,7 @@ ServerEvents.loaded(event => {
       // TODO test this
       console.log(`KJS INFO: RemoveGuildMemberEvent - Guild ID: ${guildData.id}, Name: ${guildData.settings.name}, Player UUID: ${playerUUID.toString()}`);
       console.log(`NEW GUILD DATA FROM EVENT: ${guildData}`)
-
+      saveGuildData(guildData)
       // e.g., if (guildData && GUILDS[guildData.id]) {
       //   const updatedMembersGuildData = getGuildData(guild); // Re-fetch to get latest members
       //   GUILDS[guildData.id].members = updatedMembersGuildData.members;
