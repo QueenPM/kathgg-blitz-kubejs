@@ -235,7 +235,7 @@ let PLAYER_NAME_MAP = new Map();
 /**
  * Gets a player Name from UUID
  * @param {string} uuid
- * @returns
+ * @returns {string}
  */
 function getPlayerName(uuid) {
   let name = PLAYER_NAME_MAP[uuid];
