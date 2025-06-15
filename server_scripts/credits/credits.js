@@ -38,11 +38,11 @@ function giveCredits(player, credits) {
   playerData.credits += credits;
 
   /** @type {TextComponent[]} */
-  let msg = [{ text: `§e+§6$${CREDITS_FOR_KILLS}` }];
+  let msg = [{ text: `§e+§6◎${CREDITS_FOR_KILLS}` }];
 
   if (credits > CREDITS_FOR_KILLS) {
     msg.push({
-      text: ` §e(+§6$${credits - CREDITS_FOR_KILLS} §eBonus)`,
+      text: ` §e(+§6◎${credits - CREDITS_FOR_KILLS} §eBonus)`,
     });
   }
 
@@ -119,7 +119,7 @@ ServerEvents.tick((e) => {
       /** @type {TextComponent[]} */
       let displayNameJsonComponent = [
         { text: `${actualPlayerName} ` },
-        { text: `$${numbersWithCommas(credits)}`, color: "yellow" },
+        { text: `◎${numbersWithCommas(credits)}`, color: "yellow" },
       ];
 
       let displayNameJsonString = JSON.stringify(displayNameJsonComponent);

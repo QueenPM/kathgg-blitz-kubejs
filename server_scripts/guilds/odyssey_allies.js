@@ -225,7 +225,7 @@ function getGuildItemComponent(guild, playerId) {
     text: "Guild Wealth: ",
     italic: false,
     color: "gold",
-    extra: [{ text: `$${numbersWithCommas(wealth)}`, color: "yellow" }],
+    extra: [{ text: `◎${numbersWithCommas(wealth)}`, color: "yellow" }],
   });
 
   // Divider for Misc Stats

@@ -860,7 +860,7 @@ let TrackerMenu = new Menu(
             if (FEATURE_CREDITS) {
               description.push([
                 {
-                  text: `Cost: $${GHOST_COST}`,
+                  text: `Cost: ◎${GHOST_COST}`,
                   color: "yellow",
                   italic: false,
                 },
