@@ -5,7 +5,18 @@ const STARTUP_CMDS = [
   "gamerule doInsomnia false",
   "gamerule mobGriefing false",
   "gamerule doFireTick false",
-  "gamerule maxChunkLoadedClaims 0"
+  // Cadmus Claims
+  "gamerule maxChunkLoadedClaims 0",
+  "gamerule maxClaims 50",
+  "gamerule doClaimedBlockBreaking false",
+  "gamerule doClaimedBlockExplosions false",
+  "gamerule doClaimedBlockInteractions true",
+  "gamerule doClaimedBlockPlacing false",
+  "gamerule doClaimedEntityDamage true",
+  "gamerule doClaimedEntityExplosions true",
+  "gamerule doClaimedEntityInteractions true",
+  "gamerule doClaimedItemPickup true",
+  "gamerule doClaimedMobGriefing false",
 ];
 
 ServerEvents.loaded((e) => {
