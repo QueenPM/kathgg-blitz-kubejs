@@ -546,6 +546,7 @@ ImmersiveMessage.prototype.sendServerToAll = function (server) {
  * @param {string} subtext?
  */
 function sendPlayerWarning(player, text, subtext) {
+  if(!Platform.isLoaded("immersivemessages")) return;
   let message = new ImmersiveMessage(3, text)
     .fadeIn(0.25)
     .fadeOut(0.25)
