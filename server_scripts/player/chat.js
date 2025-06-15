@@ -6,17 +6,77 @@ const ONLY_PLAYER_KILLS = false;
 
 const ANNOUNCE_KILLSTREAK_INTERVAL = 5;
 
+
+/**
+ * @typedef {EntityStatsConfig}
+ * @property {string} id
+ * @property {boolean} giveStats
+ * @property {boolean} giveCredits - Only if Credits module is enabled
+*/
+
+/**
+ * An array of Entity IDs that should count as a "kill"
+ * Can be configured to give Credits/Stats
+ * @type {EntityStatsConfig[]}
+*/
+const ENTITIES_COUNT_AS_KILLS_IDS = [
+  { id: "minecraft:pig", giveStats: true, giveCredits: true },
+];
+
+/**
+ * Gets the config for the entity
+ * @param {$LivingEntity_} entity 
+ * @returns {EntityStatsConfig|null}
+ */
+function getEntitySettings(entity){
+  if(entity.player) return { id:"player", giveStats: true, giveCredits: true}
+  const ent = ENTITIES_COUNT_AS_KILLS_IDS.find((ent) => ent.id === entity.getType().toString())
+  if(!ent) {
+    // Check for a Pet. If its a Pet with an Owner, announce the death but give no stats
+    if(entity.ownerUUID){
+      return { id: entity.getType().toString(), giveStats: false, giveCredits: false }
+    }
+    return null;
+  }
+  return ent
+}
+
 /**
  * Helper function to use the player's full name plate
- * @param {$LivingEntity_} player
+ * @param {$LivingEntity_} entity
  * @returns {TextComponent[]}
  */
-function getPlayerNamePlate(player) {
+function getPlayerNamePlate(entity) {
   // Check for entity
-  if (!player.player) return [{ text: player.name.string }];
+  if (!entity.player) {
+    // Get the Entity's Spawn Egg
+    let spawnEggId = getSpawnEggIdForEntity(entity);
+    let owner = entity.ownerUUID ? getPlayerName(entity.ownerUUID.toString()) : ""
+    let lore = [];
+    if(owner){
+      lore.push({ text: `${owner}'s Pet`, italic: false, color: "gray"})
+    }
+    return [
+      {
+        text: entity.name.string,
+        hoverEvent: {
+          action: "show_item",
+          contents: {
+            id: spawnEggId ?? "minecraft:spawner",
+            count: 1,
+            components: {
+              custom_name: JSON.stringify({ text: entity.name.string }),
+              lore: lore.map((lore) => JSON.stringify(lore))
+            },
+          },
+        },
+      },
+    ];
+  }
+
   let components = [];
 
-  const guildComp = getGuildChatComponent(player);
+  const guildComp = getGuildChatComponent(entity);
   if (guildComp) {
     components.push({ text: "[", color: "white" }, guildComp, {
       text: "] ",
@@ -24,7 +84,7 @@ function getPlayerNamePlate(player) {
     });
   }
 
-  components.push(getPlayerChatComponent(player));
+  components.push(getPlayerChatComponent(entity));
 
   return components;
 }
@@ -96,6 +156,8 @@ EntityEvents.death((event) => {
 
   // If the dead entity is not a player, return
   if (!deadPlayer && ONLY_PLAYER_KILLS) return;
+  const entityConfig = getEntitySettings(event.entity)
+  if (!entityConfig) return;
 
   // Get the Kill Distance
 
@@ -106,23 +168,26 @@ EntityEvents.death((event) => {
   /**@type {$ItemStackKJS_} */
   let weaponUsed = killerPlayer.handSlots[0];
 
-  // Add Stats for Killer and Killed
-  addKill(killerPlayer, {
-    uuid: event.entity.getStringUuid(),
-    name: deadPlayer
-      ? deadPlayer.username
-      : event.entity.getEntityType().toString(),
-    weapon: weaponUsed
-      ? {
-          id: weaponUsed.id,
-          count: weaponUsed.count,
-          components: weaponUsed.componentString,
-        }
-      : {},
-    tacz_id: getTacZItemId(killerPlayer.handSlots[0]),
-    distance: distance,
-    timestamp: Date.now(),
-  });
+  // If Stats should be given
+  if (entityConfig.giveStats) {
+    // Add Stats for Killer and Killed
+    addKill(killerPlayer, {
+      uuid: event.entity.getStringUuid(),
+      name: deadPlayer
+        ? deadPlayer.username
+        : event.entity.getEntityType().toString(),
+      weapon: weaponUsed
+        ? {
+            id: weaponUsed.id,
+            count: weaponUsed.count,
+            components: weaponUsed.componentString,
+          }
+        : {},
+      tacz_id: getTacZItemId(killerPlayer.handSlots[0]),
+      distance: distance,
+      timestamp: Date.now(),
+    });
+  }
 
   tellRawComponents.push({ text: "🏹 ", color: "dark_red" });
   tellRawComponents = tellRawComponents.concat(
@@ -193,14 +258,17 @@ EntityEvents.death((event) => {
 
   event.server.runCommandSilent(tellrawcmd);
 
-  announceKillStreak(killerPlayer, playerData);
+  // If stats have been given
+  if (entityConfig.giveStats) {
+    announceKillStreak(killerPlayer, playerData);
+  }
 
   // In case Keep Inventory is ON! Drop All (Canceling event)
   if (deadPlayer && !event.server.getGameRules().get("keepInventory"))
     deadPlayer.inventory.dropAll();
 
   // Give Credits
-  if (FEATURE_CREDITS) {
+  if (FEATURE_CREDITS && entityConfig.giveCredits) {
     // If players are NOT allies
     if (!arePlayersAllies(deadPlayer || event.entity, killerPlayer)) {
       let creditsToGive;
@@ -253,10 +321,8 @@ function announceKillStreak(player, playerData) {
   /**
    * @type {TextComponent[]}
    */
-  let tellRawComponents = [
-    { text: "★ ", color: "yellow" },
-  ]
-  tellRawComponents = tellRawComponents.concat(getPlayerNamePlate(player))
+  let tellRawComponents = [{ text: "★ ", color: "yellow" }];
+  tellRawComponents = tellRawComponents.concat(getPlayerNamePlate(player));
   tellRawComponents.push([
     { text: ` is on a `, color: "yellow" },
     { text: `${playerData.killstreak}`, color: "yellow", italic: true },
@@ -280,14 +346,14 @@ function announceLostkillstreak(killerPlayer, killedPlayer, lostKillstreak) {
   /**
    * @type {TextComponent[]}
    */
-  let tellRawComponents = [
-    { text: "★ ", color: "yellow" },
-  ]
-  tellRawComponents = tellRawComponents.concat(getPlayerNamePlate(killerPlayer))
-  tellRawComponents.push([
-    { text: ` has ended `, color: "yellow" }
-  ])
-  tellRawComponents = tellRawComponents.concat(getPlayerNamePlate(killedPlayer))
+  let tellRawComponents = [{ text: "★ ", color: "yellow" }];
+  tellRawComponents = tellRawComponents.concat(
+    getPlayerNamePlate(killerPlayer)
+  );
+  tellRawComponents.push([{ text: ` has ended `, color: "yellow" }]);
+  tellRawComponents = tellRawComponents.concat(
+    getPlayerNamePlate(killedPlayer)
+  );
   tellRawComponents.push([
     { text: `'s `, color: "yellow" },
     { text: `${lostKillstreak}`, color: "yellow", italic: true },

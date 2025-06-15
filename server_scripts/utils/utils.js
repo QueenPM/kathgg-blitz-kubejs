@@ -1,3 +1,6 @@
+const $EntityType = Java.loadClass('net.minecraft.world.entity.EntityType');
+const $SpawnEggItem = Java.loadClass('net.minecraft.world.item.SpawnEggItem');
+
 /**
  * Returns the ItemStack of the player's head.
  * @param {string} playerName
@@ -272,4 +275,29 @@ function flattenTextComponent(textComponents) {
     }
   }
   return resultString;
+}
+
+/**
+ * Gets the item ID of the spawn egg for a given entity.
+ * @param {$LivingEntity_} entity The entity for which to find the spawn egg.
+ * @returns {string|null} The item ID of the spawn egg (e.g., "minecraft:pig_spawn_egg"), or null if not found.
+ */
+function getSpawnEggIdForEntity(entity) {
+  if (!entity) return null;
+
+  const entityTypeId = entity.getType();
+
+  let spawnEggId = null;
+  const entityTypeOptional = $EntityType.byString(entityTypeId);
+
+  if (entityTypeOptional.isPresent()) {
+    const type = entityTypeOptional.get();
+    const spawnEggItemInstance = $SpawnEggItem.byId(type);
+
+    if (spawnEggItemInstance) {
+      spawnEggId = Item.of(spawnEggItemInstance).id;
+    }
+  }
+
+  return spawnEggId;
 }
