@@ -1,7 +1,6 @@
-// Cache for Guild Banners
-
 ServerEvents.commandRegistry((event) => {
   const { commands: Commands, arguments: Arguments } = event;
+  if(!Platform.isLoaded("odyssey_allies")) return;
   event.register(
     Commands.literal("banner")
       .then(

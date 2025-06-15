@@ -117,6 +117,7 @@ function getAllGuilds() {
  * @returns {null|GuildInformation}
  */
 function getPlayerGuild(player) {
+  if(!Platform.isLoaded("odyssey_allies")) return null;
   if (!player.player) return null;
   if (!GUILDS) loadGuilds();
   for (const guildId in GUILDS) {
@@ -144,6 +145,7 @@ function getPlayerGuild(player) {
  * @param {$ServerPlayer_} playerTwo
  */
 function arePlayersAllies(playerOne, playerTwo) {
+  if(!Platform.isLoaded("odyssey_allies")) return false;
   const playerOneGuild = getPlayerGuild(playerOne);
   if (!playerOneGuild) return false;
   for (const member of playerOneGuild.members) {
@@ -294,6 +296,7 @@ const ACRONYM_LOWERCASE_WORDS = [
  */
 function getGuildChatComponent(player) {
   if (!player.player) return null;
+  if(!Platform.isLoaded("odyssey_allies")) return null;
 
   const guildInfo = getPlayerGuild(player);
   if (!guildInfo) return null;

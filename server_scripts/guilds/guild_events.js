@@ -13,6 +13,7 @@ const $RemoveGuildMemberEvent = $AlliesEvents.RemoveGuildMemberEvent;
 // Register the event listeners to Update Guild Data
 // WARN: This creates multiple listeners when hopping between singleplayer worlds.
 ServerEvents.loaded((event) => {
+  if(!Platform.isLoaded("odyssey_allies")) return;
   console.log("KJS: Registering Odyssey Allies Guild event listeners...");
   loadGuilds();
 
