@@ -3,6 +3,7 @@
 // REMEMBER TO REMOVE WORLD GEN IN create-common.toml
 
 ServerEvents.recipes((event) => {
+  if(!Platform.isLoaded("create"))
   event.remove({
     mod: "create",
     not: [
