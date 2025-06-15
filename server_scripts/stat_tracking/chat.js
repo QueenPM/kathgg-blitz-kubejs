@@ -6,6 +6,29 @@ const ONLY_PLAYER_KILLS = false;
 
 const ANNOUNCE_KILLSTREAK_INTERVAL = 5;
 
+/**
+ * Helper function to use the player's full name plate
+ * @param {$LivingEntity_} player
+ * @returns {TextComponent[]}
+ */
+function getPlayerNamePlate(player) {
+  // Check for entity
+  if (!player.player) return [{ text: player.name.string }];
+  let components = [];
+
+  const guildComp = getGuildChatComponent(player);
+  if (guildComp) {
+    components.push({ text: "[", color: "white" }, guildComp, {
+      text: "] ",
+      color: "white",
+    });
+  }
+
+  components.push(getPlayerChatComponent(player));
+
+  return components;
+}
+
 // Death events during an active arena
 EntityEvents.death((event) => {
   if (!FEATURE_COMBAT_STATS) return;
@@ -197,6 +220,26 @@ EntityEvents.death((event) => {
     }
   }
 
+  event.cancel();
+});
+
+PlayerEvents.chat((event) => {
+  const chat = event.getMessage();
+  const player = event.getPlayer();
+
+  let tellRawComponents = [];
+
+  tellRawComponents = tellRawComponents.concat(getPlayerNamePlate(player));
+
+  tellRawComponents.push({
+    text: `: ${chat}`,
+    color: "white",
+  });
+
+  let tellraw = `tellraw @a {"text": "", "extra": ${JSON.stringify(
+    tellRawComponents
+  )}}`;
+  event.server.runCommandSilent(tellraw);
   event.cancel();
 });
 
