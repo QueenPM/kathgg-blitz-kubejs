@@ -5,6 +5,7 @@ const STARTUP_CMDS = [
   "gamerule doInsomnia false",
   "gamerule mobGriefing false",
   "gamerule doFireTick false",
+  "gamerule maxChunkLoadedClaims 0"
 ];
 
 ServerEvents.loaded((e) => {
