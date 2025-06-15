@@ -109,6 +109,7 @@ function getTrackableEntities(player) {
     let trackableEntities = [];
 
     for (const entity of entities) {
+      // For Development Purposes, track named pigs
       if (entity.hasCustomName() && entity.type == "minecraft:pig") {
         trackableEntities.push(entity);
         continue;
@@ -763,6 +764,13 @@ let TrackerMenu = new Menu(
                 [{ text: `Click to start tracking` }],
               ],
               itemID: "minecraft:player_head",
+              components: entity.player
+                ? obfuscatedString.length == 0
+                  ? {
+                      profile: `${entity.name.string}`,
+                    }
+                  : {}
+                : {},
             });
             slot.leftClicked = (e) => {
               menu.close();
