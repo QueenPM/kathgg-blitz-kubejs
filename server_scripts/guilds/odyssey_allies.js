@@ -6,10 +6,6 @@ const $GuildAPI = Java.loadClass(
   "earth.terrarium.odyssey_allies.api.teams.guild.GuildApi"
 ).API;
 
-const $ClaimsManager = Java.loadClass(
-  "earth.terrarium.cadmus.api.claims.ClaimApi"
-).API;
-
 /**
  * @typedef GuildPermissions - These are synced
  * @property {boolean} managePermissions
