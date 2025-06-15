@@ -109,7 +109,7 @@ EntityEvents.death((event) => {
   let tellRawComponents = [];
 
   // If the killer is not a player, or the killer is the same as the dead player
-  if (!killerPlayer || event.entity.username === killerPlayer.username) {
+  if (deadPlayer && (!killerPlayer || event.entity.username === killerPlayer.username)) {
     // It is a natural death.
 
     tellRawComponents.push({ text: "☠ ", color: "white" });
