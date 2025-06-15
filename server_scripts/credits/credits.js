@@ -16,9 +16,16 @@ function hasCredits(player, credits) {
   // if (playerData.credits >= credits) return true;
   // return false;
 
+  // Get Lightman's Currency Wallet via API
   let wallet = getPlayerMoney(player);
-  if (wallet.wallet.value >= credits) return true;
-  return false;
+
+  // If it failed get the credits from Player Store
+  if(!wallet) {
+    let pData = getPlayerData(player.uuid);
+    if(!pData) return false;
+    return pData.credits >= credits
+  }
+  return wallet.wallet.value >= credits
 }
 
 /**
@@ -53,10 +60,12 @@ function giveCredits(player, credits) {
  * @param {number} credits
  */
 function takeCredits(player, credits) {
-  // let playerData = getPlayerData(player.uuid);
-  // playerData.credits -= credits;
-
-  takePlayerMoney(player, credits);
+  if(!Platform.isLoaded("lightmanscurrency")){
+    takePlayerMoney(player, credits);
+  }else{
+    let playerData = getPlayerData(player.uuid);
+    playerData.credits -= credits;
+  }
 }
 
 /**
@@ -65,18 +74,20 @@ function takeCredits(player, credits) {
  * @param {number} credits
  */
 function setCredits(player, credits) {
-  // let playerData = getPlayerData(player.uuid);
-  // playerData.credits = credits;
-
-  let playerMoney = getPlayerMoney(player);
-  let difference = credits - playerMoney.wallet.value;
-
-  if (credits <= 0 || difference == 0) return;
-
-  if (difference > 0) {
-    takePlayerMoney(player, difference * -1);
-  } else {
-    givePlayerMoney(player, difference);
+  if(!Platform.isLoaded("lightmanscurrency")){
+    let playerMoney = getPlayerMoney(player);
+    let difference = credits - playerMoney.wallet.value;
+    
+    if (credits <= 0 || difference == 0) return;
+    
+    if (difference > 0) {
+      takePlayerMoney(player, difference * -1);
+    } else {
+      givePlayerMoney(player, difference);
+    }
+  }else{
+    let playerData = getPlayerData(player.uuid);
+    playerData.credits = credits;
   }
 }
 
@@ -124,35 +135,6 @@ ServerEvents.tick((e) => {
   }
 });
 
-// EntityEvents.death((e) => {
-//   if (!FEATURE_CREDITS) return;
-
-//   let killedPlayer = e.entity;
-//   // if(!killedPlayer.player) return;
-
-//   let killerPlayer = e.source.player;
-//   if (!killerPlayer) return;
-
-//   if (arePlayersAllies(killedPlayer, killerPlayer)) return;
-
-//   let distance = killedPlayer.position().distanceTo(killerPlayer.position());
-
-//   let creditsToGive;
-//   if(distance < MIN_DISTANCE_CREDITS_FOR_KILLS) {
-//     creditsToGive = CREDITS_FOR_KILLS
-//   }
-//   else if (distance >= MAX_DISTANCE_CREDITS_FOR_KILLS) {
-//     creditsToGive = CREDITS_FOR_KILLS_MAX;
-//   } else {
-//     creditsToGive =
-//       CREDITS_FOR_KILLS +
-//       (CREDITS_FOR_KILLS_MAX - CREDITS_FOR_KILLS) *
-//         (distance / MAX_DISTANCE_CREDITS_FOR_KILLS);
-//   }
-//   creditsToGive = Math.round(creditsToGive);
-
-//   giveCredits(killerPlayer, creditsToGive);
-// });
 
 ServerEvents.commandRegistry((event) => {
   const { commands: Commands, arguments: Arguments } = event;

@@ -56,6 +56,7 @@ const COIN_VALUES = [
  * @param {$ServerPlayer_} player
  */
 function getPlayerMoney(player) {
+  if(!Platform.isLoaded("lightmanscurrency")) return null;
   /** @type {PlayerMoney} */
   let playerMoney = {};
   let MoneyAPI = $MoneyAPI.API;
@@ -132,6 +133,7 @@ function getPlayerMoney(player) {
  * @param {number} value
  */
 function givePlayerMoney(player, value) {
+  if(!Platform.isLoaded("lightmanscurrency")) return;
   let MoneyAPI = $MoneyAPI.API;
 
   let moneyToInsert = $CoinValue.fromNumber("main", value);
@@ -144,6 +146,7 @@ function givePlayerMoney(player, value) {
  * @param {number} value
  */
 function takePlayerMoney(player, value) {
+  if(!Platform.isLoaded("lightmanscurrency")) return;
   let MoneyAPI = $MoneyAPI.API;
 
   let moneyToInsert = $CoinValue.fromNumber("main", value);
@@ -155,6 +158,7 @@ function takePlayerMoney(player, value) {
  * @param {$MinecraftServer_} server
  */
 function syncCreditsWithLightman(server) {
+  if(!Platform.isLoaded("lightmanscurrency")) return;
   let players = server.playerList.getPlayers();
   for (const player of players) {
     let value = getPlayerMoney(player);
