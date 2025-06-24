@@ -60,7 +60,7 @@ function giveCredits(player, credits) {
  * @param {number} credits
  */
 function takeCredits(player, credits) {
-  if(!Platform.isLoaded("lightmanscurrency")){
+  if(Platform.isLoaded("lightmanscurrency")){
     takePlayerMoney(player, credits);
   }else{
     let playerData = getPlayerData(player.uuid);
@@ -74,7 +74,7 @@ function takeCredits(player, credits) {
  * @param {number} credits
  */
 function setCredits(player, credits) {
-  if(!Platform.isLoaded("lightmanscurrency")){
+  if(Platform.isLoaded("lightmanscurrency")){
     let playerMoney = getPlayerMoney(player);
     let difference = credits - playerMoney.wallet.value;
     
