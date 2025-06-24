@@ -32,7 +32,7 @@ function activateGlow(player) {
   }
   if(!targetEntity) return false;
 
-  const glowDuration = POWER_IDS.glow.duration;
+  const glowDuration = POWER_IDS.glow.duration / 1000;
   
   player.server.runCommandSilent(
     `effect give ${targetEntity.stringUuid} minecraft:glowing ${Math.floor(glowDuration)} 0 true`
