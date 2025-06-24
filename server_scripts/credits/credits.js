@@ -74,18 +74,19 @@ function takeCredits(player, credits) {
  * @param {number} credits
  */
 function setCredits(player, credits) {
-  if(Platform.isLoaded("lightmanscurrency")){
+  if (Platform.isLoaded("lightmanscurrency")) {
     let playerMoney = getPlayerMoney(player);
-    let difference = credits - playerMoney.wallet.value;
-    
-    if (credits <= 0 || difference == 0) return;
-    
+    let currentCredits = playerMoney ? playerMoney.wallet.value : 0;
+    let difference = credits - currentCredits;
+
+    if (difference === 0) return;
+
     if (difference > 0) {
-      takePlayerMoney(player, difference * -1);
-    } else {
       givePlayerMoney(player, difference);
+    } else {
+      takePlayerMoney(player, -difference);
     }
-  }else{
+  } else {
     let playerData = getPlayerData(player.uuid);
     playerData.credits = credits;
   }
