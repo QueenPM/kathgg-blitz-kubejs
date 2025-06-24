@@ -18,23 +18,6 @@ const REVEAL_DISTANCE = 5;
 const DEVIATION_MIN = 5;
 const DEVIATION_MAX = 20;
 
-// Ghost Mode Config
-// Cooldown in seconds
-const GHOST_COOLDOWN = 60 * 30;
-// Duration in seconds
-const GHOST_DURATION = 60 * 5;
-// Cost in Credits (if enabled)
-const GHOST_COST = 50;
-
-/**
- * Keeps track of tracker cooldowns.
- * @type {Map<string, number>} */
-let TrackerCooldownCache = new Map();
-
-/**
- * @type {Map<string, number>}
- */
-let GHOST_USED = new Map();
 
 /**
  * @typedef TrackerUpgrades
@@ -117,7 +100,7 @@ function getTrackableEntities(player) {
 
       if (entity.player) {
         // Ignore players in ghost mode
-        if (GHOST_USED.get(`${entity.uuid}`)) continue;
+        if (isPowerActive(`${entity.uuid}`, "ghost")) continue;
         if (entity.uuid.toString() === player.uuid.toString()) continue;
         trackableEntities.push(entity);
       }
@@ -193,7 +176,6 @@ function isItemTracker(tracker) {
 /**
  * Gets the player's tracker from all their possible inventory slots. Returns null if they dont have a tracker
  * @param {$ServerPlayer_} player
- * @returns {$ItemStack_|null}
  */
 function getTrackerFromPlayer(player) {
   /** @type {$ItemStack_} */
@@ -207,6 +189,7 @@ function getTrackerFromPlayer(player) {
     }
     slot++;
   }
+  if(!tracker) return null;
   return { slot: slot, tracker: tracker };
 }
 
@@ -246,7 +229,7 @@ function deviatePosition(position) {
 function updateTracker(player, entity, newTrackerData, trackerSlotInt) {
   if (typeof trackerSlotInt == "undefined") return;
 
-  if (GHOST_USED.get(`${entity.uuid}`)) {
+  if (isPowerActive(`${entity.uuid}`, "ghost")) {
     player.server.runCommandSilent(
       `tellraw ${player.username} [{"text":"You cannot track ${entity.username} because they are Ghosted", "color":"gray"}]`
     );
@@ -602,108 +585,6 @@ function coloredDimension(dimension) {
   }
 }
 
-// Ghost
-/**
- * Activates Ghost Mode for a player
- * @param {$ServerPlayer_} player
- */
-function activateGhost(player) {
-  // Check if the player can use ghost
-  let ghostLastUsed = GHOST_USED.get(`${player.uuid}`);
-
-  if (ghostLastUsed && Date.now() - ghostLastUsed <= GHOST_COOLDOWN * 1000) {
-    let endsAt = ghostLastUsed + GHOST_COOLDOWN * 1000;
-    player.server.runCommandSilent(
-      `tellraw ${
-        player.username
-      } [{"text":"Ghost is on cooldown for ${timeToString(
-        endsAt - Date.now()
-      )}", "color":"dark_red"}]`
-    );
-    return;
-  }
-
-  if (FEATURE_CREDITS) {
-    let data = getPlayerData(player.uuid);
-    if (data && hasCredits(player, GHOST_COST)) {
-      takeCredits(player, GHOST_COST);
-    } else {
-      player.server.runCommandSilent(
-        `tellraw ${player.username} [{"text":"You cannot afford to Ghost", "color":"dark_red"}]`
-      );
-      return;
-    }
-  }
-
-  GHOST_USED.set(`${player.uuid}`, Date.now());
-  player.server.runCommandSilent(
-    `tellraw @a {"text":"", "extra": [${JSON.stringify(
-      getPlayerChatComponent(player)
-    )}, {"text":" has activated Ghost Organisation", "color":"gray"}]}`
-  );
-
-  player.server.runCommandSilent(
-    `bossbar remove ghost_${player.username.toLowerCase()}`
-  );
-  player.server.runCommandSilent(
-    `bossbar add ghost_${player.username.toLowerCase()} [{"text":"Ghost Duration: ${timeToString(
-      GHOST_DURATION * 1000
-    )}"}]`
-  );
-  player.server.runCommandSilent(
-    `bossbar set ghost_${player.username.toLowerCase()} value 100`
-  );
-  player.server.runCommandSilent(
-    `bossbar set ghost_${player.username.toLowerCase()} players ${
-      player.username
-    }`
-  );
-}
-
-// Remove all Boss Bars on load
-ServerEvents.loaded((e) => {
-  let players = getLeaderboard();
-  for (const player of players) {
-    e.server.runCommandSilent(
-      `bossbar remove ghost_${player.name.toLowerCase()}`
-    );
-  }
-});
-
-ServerEvents.tick((e) => {
-  if (e.server.tickCount % 20 != 0) return;
-
-  GHOST_USED.forEach((v, k) => {
-    let endsAt = v + GHOST_DURATION * 1000;
-    let now = Date.now();
-    let player = getPlayerName(k).toLowerCase();
-    if (endsAt > now) {
-      let remaining = endsAt - now;
-      let total = GHOST_DURATION * 1000;
-      let progress = Math.floor((remaining / total) * 100);
-      e.server.runCommandSilent(
-        `bossbar set ghost_${player} value ${progress}`
-      );
-      e.server.runCommandSilent(
-        `bossbar set ghost_${player} name [{"text":"Ghost Duration: ${timeToString(
-          remaining
-        )}"}]`
-      );
-    } else {
-      GHOST_USED.delete(k);
-      player = e.server.getPlayer(k);
-      e.server.runCommandSilent(
-        `bossbar remove ghost_${player.username.toLowerCase()}`
-      );
-      e.server.runCommandSilent(
-        `tellraw @a {"text":"", "extra": [${JSON.stringify(
-          getPlayerChatComponent(player)
-        )}, {"text":" has left Ghost Organisation", "color":"gray"}]}`
-      );
-    }
-  });
-});
-
 // GUI
 
 let TrackerMenu = new Menu(
@@ -732,7 +613,7 @@ let TrackerMenu = new Menu(
             menu.player.getDistance(entity.position())
           );
 
-          let ghosted = GHOST_USED.get(`${entity.uuid}`);
+          let ghosted = isPowerActive(`${entity.uuid}`, "ghost")
 
           let distance = deviatePosition(entity.position())
             .distanceTo(menu.player.position())
@@ -830,95 +711,18 @@ let TrackerMenu = new Menu(
 
           // Special Powers
 
-          menu.gui.slot(3, 4, (slot) => {
-            let ghostLastUsed = GHOST_USED.get(`${menu.player.uuid}`);
-            let cooldown = "";
-            if (
-              ghostLastUsed &&
-              Date.now() - ghostLastUsed <= GHOST_COOLDOWN * 1000
-            ) {
-              let endsAt = ghostLastUsed + GHOST_COOLDOWN * 1000;
-              cooldown = timeToString(endsAt - Date.now());
-            }
-
-            let description = [
-              [
-                {
-                  text: "§7Activates Ghost",
-                  color: "green",
-                  italic: false,
-                },
-              ],
-              [
-                {
-                  text: "§7You cannot be tracked during the duration",
-                  color: "green",
-                  italic: false,
-                },
-              ],
-              [
-                {
-                  text: "",
-                  color: "green",
-                  italic: false,
-                },
-              ],
-            ];
-
-            if (FEATURE_CREDITS) {
-              description.push([
-                {
-                  text: `Cost: ◎${GHOST_COST}`,
-                  color: "yellow",
-                  italic: false,
-                },
-              ]);
-            }
-
-            description.push(
-              [
-                {
-                  text: "Duration: ",
-                  color: "green",
-                  italic: false,
-                },
-                {
-                  text: timeToString(GHOST_DURATION * 1000),
-                  color: "green",
-                  italic: false,
-                },
-              ],
-              [
-                {
-                  text: "Cooldown: ",
-                  color: "red",
-                  italic: false,
-                },
-                {
-                  text: timeToString(GHOST_COOLDOWN * 1000),
-                  color: "red",
-                  italic: false,
-                },
-              ]
-            );
-
-            slot.item = createMenuButton({
-              title: [
-                {
-                  text: `Ghost${cooldown ? ` (${cooldown})` : ""}`,
-                  color: "white",
-                  italic: false,
-                },
-              ],
-              description: description,
-              itemID: "minecraft:structure_void",
+          for(let i = 0; i < Object.keys(POWER_IDS).length && i != 6; i++){
+            menu.gui.slot(i + 2, 3, (slot) => {
+              let powerId = Object.keys(POWER_IDS)[i]
+              slot.item = getPowerButton(`${menu.player.stringUuid}`, powerId)
+              slot.leftClicked = (e) => {
+                menu.close();
+                menu.player.server.scheduleInTicks(2, () => {
+                  tryActivatePower(menu.player, powerId)
+                })
+              };
             });
-
-            slot.leftClicked = (e) => {
-              menu.close();
-              activateGhost(menu.player);
-            };
-          });
+          }
         }
       },
     },
