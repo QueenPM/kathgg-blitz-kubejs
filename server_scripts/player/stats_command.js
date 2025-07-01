@@ -139,7 +139,7 @@ function getPlayerItemComponent(player) {
         { text: `${player.killstreak}`, color: "yellow" }, // Current
         { text: " / ", color: "dark_gray" },
         { text: `${player.highest_killstreak}`, color: "gold" }, // Highest (differentiated color)
-        { text: " (Highest)", color: "gray"},
+        { text: " (Highest)", color: "gray" },
       ],
     },
     {
@@ -227,7 +227,7 @@ function getPlayerItemComponent(player) {
 
   return {
     custom_name: name, // For the item's name (e.g., Player Head)
-    lore: lore,        // Lore for the item tooltip
+    lore: lore, // Lore for the item tooltip
     profile: player.name, // For player head texture
   };
 }
@@ -538,6 +538,19 @@ let KDAMenu = new Menu(
               });
             });
         });
+        // TODO
+        // menu.gui.slot(2, 0, (slot) => {
+        //   (slot.item = createMenuButton({
+        //     title: [{ text: "Advancements", italic: false, color: "yellow" }],
+        //     description: ["View advancements"],
+        //     itemID: "minecraft:book",
+        //   })),
+        //     (slot.leftClicked = (e) => {
+        //       menu.ShowPage("advancements", {
+        //         target: statPlayer,
+        //       });
+        //     });
+        // });
       },
     },
     {
@@ -779,6 +792,10 @@ let KDAMenu = new Menu(
             });
         });
       },
+    },
+    {
+      name: "advancements",
+      load: advancementMenu,
     },
   ]
 );
