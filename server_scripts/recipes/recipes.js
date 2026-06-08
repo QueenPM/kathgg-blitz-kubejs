@@ -1,5 +1,4 @@
 const RECIPES_TO_REMOVE = [
-  // 'tacz:gunpowder',
   "sophisticatedbackpacks:inseption_upgrade",
   "sophisticatedbackpacks:backpack",
   "sophisticatedbackpacks:iron_backpack",
@@ -17,10 +16,10 @@ ServerEvents.recipes((event) => {
     ["SBS", "SCS", "LLL"],
     {
       S: "minecraft:string",
-      B: "ars_nouveau:source_gem_block",
+      B: "minecraft:diamond_block",
       C: "minecraft:chest",
       L: "minecraft:leather",
-    }
+    },
   );
   event.shaped(
     Item.of("sophisticatedbackpacks:iron_backpack", 1),
@@ -28,7 +27,7 @@ ServerEvents.recipes((event) => {
     {
       B: "minecraft:iron_block",
       C: "sophisticatedbackpacks:backpack",
-    }
+    },
   );
   event.shaped(
     Item.of("sophisticatedbackpacks:gold_backpack", 1),
@@ -36,7 +35,7 @@ ServerEvents.recipes((event) => {
     {
       B: "minecraft:gold_block",
       C: "sophisticatedbackpacks:iron_backpack",
-    }
+    },
   );
   event.shaped(
     Item.of("sophisticatedbackpacks:diamond_backpack", 1),
@@ -44,7 +43,7 @@ ServerEvents.recipes((event) => {
     {
       B: "minecraft:diamond_block",
       C: "sophisticatedbackpacks:gold_backpack",
-    }
+    },
   );
 
   // Remove recipes
