@@ -1,5 +1,5 @@
-const $EntityType = Java.loadClass('net.minecraft.world.entity.EntityType');
-const $SpawnEggItem = Java.loadClass('net.minecraft.world.item.SpawnEggItem');
+const $EntityType = Java.loadClass("net.minecraft.world.entity.EntityType");
+const $SpawnEggItem = Java.loadClass("net.minecraft.world.item.SpawnEggItem");
 
 /**
  * Returns the ItemStack of the player's head.

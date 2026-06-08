@@ -1,5 +1,7 @@
+// requires: immersivemessages
+
 const $ImmersiveAPI = Java.loadClass(
-  "toni.immersivemessages.api.ImmersiveMessage"
+  "toni.immersivemessages.api.ImmersiveMessage",
 );
 const $Color = Java.loadClass("net.minecraft.ChatFormatting");
 const $TextColor = Java.loadClass("net.minecraft.network.chat.TextColor");
@@ -8,10 +10,10 @@ const $Text = Java.loadClass("net.minecraft.network.chat.Component");
 const $TextAnchor = Java.loadClass("toni.immersivemessages.api.TextAnchor");
 const $SoundEffect = Java.loadClass("toni.immersivemessages.api.SoundEffect");
 const $ImmersiveColor = Java.loadClass(
-  "toni.immersivemessages.util.ImmersiveColor"
+  "toni.immersivemessages.util.ImmersiveColor",
 );
 const $ObfuscateMode = Java.loadClass(
-  "toni.immersivemessages.api.ObfuscateMode"
+  "toni.immersivemessages.api.ObfuscateMode",
 );
 const $ImmersiveFont = Java.loadClass("toni.immersivemessages.ImmersiveFont");
 
@@ -24,7 +26,7 @@ let ImmersiveMessage = function (length, textOrComponent) {
   if (typeof textOrComponent === "string") {
     this.builder = $ImmersiveAPI["builder(float,java.lang.String)"](
       length,
-      textOrComponent
+      textOrComponent,
     );
   } else {
     // Assuming textOrComponent is a MutableComponent if not a string
@@ -61,7 +63,7 @@ ImmersiveMessage.popup = function (duration, title, subtitle) {
   msg.builder = $ImmersiveAPI["popup(float,java.lang.String,java.lang.String)"](
     duration,
     title,
-    subtitle
+    subtitle,
   );
   return msg;
 };
@@ -78,7 +80,7 @@ ImmersiveMessage.toast = function (duration, title, subtitle) {
   msg.builder = $ImmersiveAPI["toast(float,java.lang.String,java.lang.String)"](
     duration,
     title,
-    subtitle
+    subtitle,
   );
   return msg;
 };
@@ -129,7 +131,7 @@ ImmersiveMessage.prototype.backgroundColor = function (colorOrInt) {
     this.builder["backgroundColor(int)"](colorOrInt);
   } else {
     this.builder["backgroundColor(toni.immersivemessages.util.ImmersiveColor)"](
-      colorOrInt
+      colorOrInt,
     );
   }
   return this;
@@ -145,7 +147,7 @@ ImmersiveMessage.prototype.borderTopColor = function (colorOrInt) {
     this.builder["borderTopColor(int)"](colorOrInt);
   } else {
     this.builder["borderTopColor(toni.immersivemessages.util.ImmersiveColor)"](
-      colorOrInt
+      colorOrInt,
     );
   }
   return this;
@@ -233,7 +235,7 @@ ImmersiveMessage.prototype.subtext = function (
   delay,
   subtextString,
   offsetOrBuilder,
-  builderIfOffset
+  builderIfOffset,
 ) {
   if (
     typeof offsetOrBuilder === "number" &&
@@ -246,7 +248,7 @@ ImmersiveMessage.prototype.subtext = function (
     this.builder["subtext(float,java.lang.String,java.util.function.Consumer)"](
       delay,
       subtextString,
-      offsetOrBuilder
+      offsetOrBuilder,
     );
   }
   return this;
@@ -410,7 +412,7 @@ ImmersiveMessage.prototype.font = function (fontNameOrObject) {
     this.builder["font(java.lang.String)"](fontNameOrObject);
   } else {
     this.builder["font(toni.immersivemessages.ImmersiveFont)"](
-      fontNameOrObject
+      fontNameOrObject,
     );
   }
   return this;
@@ -447,7 +449,7 @@ ImmersiveMessage.prototype.shadow = function (hasShadow) {
  */
 ImmersiveMessage.prototype.animation = function (animationBuilderConsumer) {
   this.builder["animation(java.util.function.Consumer)"](
-    animationBuilderConsumer
+    animationBuilderConsumer,
   );
   return this;
 };
@@ -466,13 +468,13 @@ ImmersiveMessage.prototype.obfuscate = function (modeOrSpeed, speedIfMode) {
   } else if (speedIfMode === undefined) {
     // modeOrSpeed is ObfuscateMode
     this.builder["obfuscate(toni.immersivemessages.api.ObfuscateMode)"](
-      modeOrSpeed
+      modeOrSpeed,
     );
   } else {
     // modeOrSpeed is ObfuscateMode, speedIfMode is float
     this.builder["obfuscate(toni.immersivemessages.api.ObfuscateMode,float)"](
       modeOrSpeed,
-      speedIfMode
+      speedIfMode,
     );
   }
   return this;
@@ -546,7 +548,7 @@ ImmersiveMessage.prototype.sendServerToAll = function (server) {
  * @param {string} subtext?
  */
 function sendPlayerWarning(player, text, subtext) {
-  if(!Platform.isLoaded("immersivemessages")) return;
+  if (!Platform.isLoaded("immersivemessages")) return;
   let message = new ImmersiveMessage(3, text)
     .fadeIn(0.25)
     .fadeOut(0.25)

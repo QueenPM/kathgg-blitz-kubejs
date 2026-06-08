@@ -1,9 +1,10 @@
+// requires: odyssey_allies
 // priority: 1
 
 const MAX_GUILD_NAME_LENGTH = 10;
 
 const $GuildAPI = Java.loadClass(
-  "earth.terrarium.odyssey_allies.api.teams.guild.GuildApi"
+  "earth.terrarium.odyssey_allies.api.teams.guild.GuildApi",
 ).API;
 
 /**
@@ -99,6 +100,7 @@ function getGuildData(guild) {
  * @returns {GuildInformation[]}
  */
 function getAllGuilds() {
+  if (!Platform.isLoaded("odyssey_allies")) return null;
   let guilds = $GuildAPI.getAll(server.getAllLevels().iterator().next());
   let guildsArray = [];
   for (const guild of guilds) {
@@ -113,7 +115,7 @@ function getAllGuilds() {
  * @returns {null|GuildInformation}
  */
 function getPlayerGuild(player) {
-  if(!Platform.isLoaded("odyssey_allies")) return null;
+  if (!Platform.isLoaded("odyssey_allies")) return null;
   if (!player.player) return null;
   if (!GUILDS) loadGuilds();
   for (const guildId in GUILDS) {
@@ -141,7 +143,7 @@ function getPlayerGuild(player) {
  * @param {$ServerPlayer_} playerTwo
  */
 function arePlayersAllies(playerOne, playerTwo) {
-  if(!Platform.isLoaded("odyssey_allies")) return false;
+  if (!Platform.isLoaded("odyssey_allies")) return false;
   const playerOneGuild = getPlayerGuild(playerOne);
   if (!playerOneGuild) return false;
   for (const member of playerOneGuild.members) {
@@ -292,14 +294,14 @@ const ACRONYM_LOWERCASE_WORDS = [
  */
 function getGuildChatComponent(player) {
   if (!player.player) return null;
-  if(!Platform.isLoaded("odyssey_allies")) return null;
+  if (!Platform.isLoaded("odyssey_allies")) return null;
 
   const guildInfo = getPlayerGuild(player);
   if (!guildInfo) return null;
 
   const guildDisplayItemNBT = getGuildItemComponent(
     guildInfo,
-    player.uuid.toString()
+    player.uuid.toString(),
   );
 
   let originalGuildName = guildInfo.settings.name;

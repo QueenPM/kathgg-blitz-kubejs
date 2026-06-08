@@ -1,7 +1,8 @@
+// requires: odyssey_allies
 // priority: 0
 
 const $AlliesEvents = Java.loadClass(
-  "earth.terrarium.odyssey_allies.api.events.AlliesEvents"
+  "earth.terrarium.odyssey_allies.api.events.AlliesEvents",
 );
 
 const $CreateGuildEvent = $AlliesEvents.CreateGuildEvent;
@@ -13,7 +14,7 @@ const $RemoveGuildMemberEvent = $AlliesEvents.RemoveGuildMemberEvent;
 // Register the event listeners to Update Guild Data
 // WARN: This creates multiple listeners when hopping between singleplayer worlds.
 ServerEvents.loaded((event) => {
-  if(!Platform.isLoaded("odyssey_allies")) return;
+  if (!Platform.isLoaded("odyssey_allies")) return;
   console.log("KJS: Registering Odyssey Allies Guild event listeners...");
   loadGuilds();
 
@@ -31,7 +32,7 @@ ServerEvents.loaded((event) => {
       console.error(
         `KJS ERROR: CreateGuildEvent - Guild ID ${
           guild ? guild.id() : "unknown"
-        }: ${e}`
+        }: ${e}`,
       );
     }
   });
@@ -45,14 +46,14 @@ ServerEvents.loaded((event) => {
     try {
       let guildData = getGuildData(guild);
       console.log(
-        `KJS INFO: RemoveGuildEvent - Guild ID: ${guildData.id}, Name: ${guildData.settings.name}}`
+        `KJS INFO: RemoveGuildEvent - Guild ID: ${guildData.id}, Name: ${guildData.settings.name}}`,
       );
       if (guildData) delete GUILDS[guildData.id];
     } catch (e) {
       console.error(
         `KJS ERROR: RemoveGuildEvent - Guild ID ${
           guild ? guild.id() : "unknown"
-        }: ${e}`
+        }: ${e}`,
       );
     }
   });
@@ -66,14 +67,14 @@ ServerEvents.loaded((event) => {
     try {
       let guildData = getGuildData(guild);
       console.log(
-        `KJS INFO: GuildChangedEvent - Guild ID: ${guildData.id}, Name: ${guildData.settings.name}}`
+        `KJS INFO: GuildChangedEvent - Guild ID: ${guildData.id}, Name: ${guildData.settings.name}}`,
       );
       saveGuildData(guildData);
     } catch (e) {
       console.error(
         `KJS ERROR: GuildChangedEvent - Guild ID ${
           guild ? guild.id() : "unknown"
-        }: ${e}`
+        }: ${e}`,
       );
     }
   });
@@ -92,7 +93,7 @@ ServerEvents.loaded((event) => {
       console.log(
         `KJS INFO: ModifyGuildMemberEvent - Guild ID: ${guildData.id}, Name: ${
           guildData.settings.name
-        }, Player UUID: ${playerUUID.toString()}, New Status: ${status.name()}}`
+        }, Player UUID: ${playerUUID.toString()}, New Status: ${status.name()}}`,
       );
       console.log(`NEW GUILD DATA FROM EVENT: ${guildData}`);
       saveGuildData(guildData);
@@ -104,7 +105,7 @@ ServerEvents.loaded((event) => {
       console.error(
         `KJS ERROR: ModifyGuildMemberEvent - Guild ID ${
           guild ? guild.id() : "unknown"
-        }, Player UUID ${playerUUID ? playerUUID.toString() : "unknown"}: ${e}`
+        }, Player UUID ${playerUUID ? playerUUID.toString() : "unknown"}: ${e}`,
       );
     }
   });
@@ -122,7 +123,7 @@ ServerEvents.loaded((event) => {
       console.log(
         `KJS INFO: RemoveGuildMemberEvent - Guild ID: ${guildData.id}, Name: ${
           guildData.settings.name
-        }, Player UUID: ${playerUUID.toString()}`
+        }, Player UUID: ${playerUUID.toString()}`,
       );
       console.log(`NEW GUILD DATA FROM EVENT: ${guildData}`);
       saveGuildData(guildData);
@@ -134,7 +135,7 @@ ServerEvents.loaded((event) => {
       console.error(
         `KJS ERROR: RemoveGuildMemberEvent - Guild ID ${
           guild ? guild.id() : "unknown"
-        }, Player UUID ${playerUUID ? playerUUID.toString() : "unknown"}: ${e}`
+        }, Player UUID ${playerUUID ? playerUUID.toString() : "unknown"}: ${e}`,
       );
     }
   });

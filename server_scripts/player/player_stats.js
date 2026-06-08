@@ -1,7 +1,5 @@
 // priority: 9
 
-let $ItemStackKJS = Java.loadClass("dev.latvian.mods.kubejs.core.ItemStackKJS");
-
 const KDR_PATH = "kubejs/data/player_stats.json";
 
 /**
@@ -97,7 +95,7 @@ function addKill(player, kill) {
   playerData.killstreak++;
   playerData.highest_killstreak = Math.max(
     playerData.highest_killstreak,
-    playerData.killstreak
+    playerData.killstreak,
   );
   playerData.kill_history.push(kill);
   let victimData = PlayerStatsCache.get(kill.uuid);
@@ -117,8 +115,8 @@ function addDeath(player, source) {
   // If the source is a player, increment their deaths
   if (source.player) {
     playerData.player_deaths++;
-    if(playerData.killstreak && source.player){
-      announceLostkillstreak(source.player, player, playerData.killstreak)
+    if (playerData.killstreak && source.player) {
+      announceLostkillstreak(source.player, player, playerData.killstreak);
     }
     playerData.killstreak = 0;
     playerData.kdr = playerData.kills / Math.max(1, playerData.player_deaths);
@@ -208,9 +206,6 @@ function createPlayerData(uuid, name) {
   leaderboard.push(data);
 }
 
-/**
- * @param {$ItemStack_} item : The item to check
- */
 function getTacZItemId(item) {
   let id = item.id ?? item.item;
   if (!item || id != "tacz:modern_kinetic_gun") return "";
@@ -238,8 +233,10 @@ let PLAYER_NAME_MAP = new Map();
  * @returns {string}
  */
 function getPlayerName(uuid) {
-  let name = PLAYER_NAME_MAP[uuid];
-  if (name) return name;
+  if (PLAYER_NAME_MAP) {
+    let name = PLAYER_NAME_MAP[uuid];
+    if (name) return name;
+  }
 
   // Search the leaderboard
   let leaderboard = getLeaderboard();
@@ -300,7 +297,7 @@ function getKillIcon(kill) {
   if (isItemSpellbook(kill.weapon)) {
     // Add the spell information
     let spell = getSelectedSpell(
-      Item.of(`${kill.weapon.id}${kill.weapon.components}`)
+      Item.of(`${kill.weapon.id}${kill.weapon.components}`),
     );
     if (spell) {
       if (spell.name) {
@@ -310,8 +307,8 @@ function getKillIcon(kill) {
             { text: spell.name, color: "aqua", italic: true },
           ],
           [{ text: "Glyphs: ", color: "gray", italic: false }].concat(
-            colorSpellGlyphs(spell.recipe)
-          )
+            colorSpellGlyphs(spell.recipe),
+          ),
         );
       } else {
         // lore.push([
@@ -320,8 +317,8 @@ function getKillIcon(kill) {
         // ])
         lore.push(
           [{ text: "Spell: ", color: "gray", italic: false }].concat(
-            colorSpellGlyphs(spell.recipe)
-          )
+            colorSpellGlyphs(spell.recipe),
+          ),
         );
       }
     }
@@ -340,7 +337,7 @@ function getKillIcon(kill) {
         color: "gray",
         italic: false,
       },
-    ]
+    ],
   );
 
   let displayComponent = textDisplayComponent(
@@ -351,7 +348,7 @@ function getKillIcon(kill) {
         color: "dark_purple",
       },
     ],
-    lore
+    lore,
   );
   return Item.of(`minecraft:player_head[${displayComponent}]`);
 }
@@ -359,7 +356,6 @@ function getKillIcon(kill) {
 /**
  * Returns a Death's icon in ItemStack form
  * @param {Death} death
- * @returns {$ItemStack_}
  */
 function getDeathIcon(death) {
   let defaultLore = [
@@ -395,7 +391,7 @@ function getDeathIcon(death) {
             color: "red",
           },
         ],
-        defaultLore
+        defaultLore,
       );
       // tood get the spawn egg
       return Item.of(`${death.source_entity}_spawn_egg[${displayComponent}]`);
@@ -408,7 +404,7 @@ function getDeathIcon(death) {
             color: "white",
           },
         ],
-        defaultLore
+        defaultLore,
       );
       return Item.of(`minecraft:feather[${displayComponent}]`);
     case "drown":
@@ -420,7 +416,7 @@ function getDeathIcon(death) {
             color: "aqua",
           },
         ],
-        defaultLore
+        defaultLore,
       );
       return Item.of(`minecraft:water_bucket[${displayComponent}]`);
     case "lava":
@@ -432,7 +428,7 @@ function getDeathIcon(death) {
             color: "red",
           },
         ],
-        defaultLore
+        defaultLore,
       );
       return Item.of(`minecraft:lava_bucket[${displayComponent}]`);
     case "inFire":
@@ -444,7 +440,7 @@ function getDeathIcon(death) {
             color: "red",
           },
         ],
-        defaultLore
+        defaultLore,
       );
       return Item.of(`minecraft:blaze_powder[${displayComponent}]`);
     case "inWall":
@@ -456,7 +452,7 @@ function getDeathIcon(death) {
             color: "gray",
           },
         ],
-        defaultLore
+        defaultLore,
       );
       return Item.of(`minecraft:sand[${displayComponent}]`);
     case "outOfWorld":
@@ -468,7 +464,7 @@ function getDeathIcon(death) {
             color: "dark_gray",
           },
         ],
-        defaultLore
+        defaultLore,
       );
       return Item.of(`minecraft:ender_pearl[${displayComponent}]`);
     case "freeze":
@@ -480,7 +476,7 @@ function getDeathIcon(death) {
             color: "aqua",
           },
         ],
-        defaultLore
+        defaultLore,
       );
       return Item.of(`minecraft:packed_ice[${displayComponent}]`);
     default:
@@ -492,7 +488,7 @@ function getDeathIcon(death) {
             color: "red",
           },
         ],
-        defaultLore
+        defaultLore,
       );
       return Item.of(`minecraft:skeleton_skull[${displayComponent}]`);
   }

@@ -1,20 +1,22 @@
+// requires: lightmanscurrency
+
 const CuriosAPI = Java.loadClass("top.theillusivec4.curios.api.CuriosApi");
 
 const $MoneyAPI = Java.loadClass(
-  "io.github.lightman314.lightmanscurrency.api.money.MoneyAPI"
+  "io.github.lightman314.lightmanscurrency.api.money.MoneyAPI",
 );
 const $BankAPI = Java.loadClass(
-  "io.github.lightman314.lightmanscurrency.api.money.bank.BankAPI"
+  "io.github.lightman314.lightmanscurrency.api.money.bank.BankAPI",
 );
 const $MoneyValue = Java.loadClass(
-  "io.github.lightman314.lightmanscurrency.api.money.value.MoneyValue"
+  "io.github.lightman314.lightmanscurrency.api.money.value.MoneyValue",
 );
 const $CoinValue = Java.loadClass(
-  "io.github.lightman314.lightmanscurrency.api.money.value.builtin.CoinValue"
+  "io.github.lightman314.lightmanscurrency.api.money.value.builtin.CoinValue",
 );
 
 const IBankAccount = Java.loadClass(
-  "io.github.lightman314.lightmanscurrency.api.money.bank.IBankAccount"
+  "io.github.lightman314.lightmanscurrency.api.money.bank.IBankAccount",
 );
 
 const WALLET_IDS = [
@@ -56,7 +58,7 @@ const COIN_VALUES = [
  * @param {$ServerPlayer_} player
  */
 function getPlayerMoney(player) {
-  if(!Platform.isLoaded("lightmanscurrency")) return null;
+  if (!Platform.isLoaded("lightmanscurrency")) return null;
   /** @type {PlayerMoney} */
   let playerMoney = {};
   let MoneyAPI = $MoneyAPI.API;
@@ -133,7 +135,7 @@ function getPlayerMoney(player) {
  * @param {number} value
  */
 function givePlayerMoney(player, value) {
-  if(!Platform.isLoaded("lightmanscurrency")) return;
+  if (!Platform.isLoaded("lightmanscurrency")) return;
   let MoneyAPI = $MoneyAPI.API;
 
   let moneyToInsert = $CoinValue.fromNumber("main", value);
@@ -146,7 +148,7 @@ function givePlayerMoney(player, value) {
  * @param {number} value
  */
 function takePlayerMoney(player, value) {
-  if(!Platform.isLoaded("lightmanscurrency")) return;
+  if (!Platform.isLoaded("lightmanscurrency")) return;
   let MoneyAPI = $MoneyAPI.API;
 
   let moneyToInsert = $CoinValue.fromNumber("main", value);
@@ -158,7 +160,7 @@ function takePlayerMoney(player, value) {
  * @param {$MinecraftServer_} server
  */
 function syncCreditsWithLightman(server) {
-  if(!Platform.isLoaded("lightmanscurrency")) return;
+  if (!Platform.isLoaded("lightmanscurrency")) return;
   let players = server.playerList.getPlayers();
   for (const player of players) {
     let value = getPlayerMoney(player);
