@@ -58,7 +58,7 @@ function getKillWeaponID(kill) {
 function loadLeaderboard() {
   PlayerStatsCache = JsonIO.read(KDR_PATH);
   if (!PlayerStatsCache) {
-    JsonIO.write(KDR_PATH, "{}");
+    JsonIO.write(KDR_PATH, {});
   }
   PlayerStatsCache = JsonIO.read(KDR_PATH);
 }
