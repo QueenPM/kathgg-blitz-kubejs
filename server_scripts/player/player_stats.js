@@ -78,7 +78,9 @@ function getLeaderboard() {
 
 function saveLeaderboard() {
   if (!PlayerStatsCache) loadLeaderboard();
-  syncCreditsWithLightman(server);
+  if (Platform.isLoaded("lightmanscurrency")) {
+    syncCreditsWithLightman(server);
+  }
   JsonIO.write(KDR_PATH, PlayerStatsCache);
 }
 
