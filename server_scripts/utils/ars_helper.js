@@ -1,8 +1,10 @@
+// requires: arsnouveau
+
 let $SpellSlotMap = Java.loadClass(
-  "com.hollingsworth.arsnouveau.api.spell.SpellSlotMap"
+  "com.hollingsworth.arsnouveau.api.spell.SpellSlotMap",
 );
 let $SpellCaster = Java.loadClass(
-  "com.hollingsworth.arsnouveau.api.spell.SpellCaster"
+  "com.hollingsworth.arsnouveau.api.spell.SpellCaster",
 );
 
 const ARS_SPELLBOOK_IDS = [

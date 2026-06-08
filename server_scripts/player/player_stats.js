@@ -296,7 +296,12 @@ function getKillIcon(kill) {
   ]);
 
   // Check for Ars Nouveau Spellbook
-  if (isItemSpellbook(kill.weapon)) {
+  let spellBook;
+  if (Platform.isLoaded("arsnouveau")) {
+    spellBook = isItemSpellbook(kill.weapon);
+  }
+
+  if (spellBook) {
     // Add the spell information
     let spell = getSelectedSpell(
       Item.of(`${kill.weapon.id}${kill.weapon.components}`),

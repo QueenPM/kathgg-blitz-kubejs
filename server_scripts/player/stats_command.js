@@ -32,21 +32,21 @@ ServerEvents.commandRegistry((event) => {
     Commands.literal("cs").executes((c) => {
       KDAMenu.OpenMenu(c.source.player, "main", { sort: 0 });
       return 1;
-    })
+    }),
   );
 
   event.register(
     Commands.literal("combatstats").executes((c) => {
       KDAMenu.OpenMenu(c.source.player, "main", { sort: 0 });
       return 1;
-    })
+    }),
   );
 
   event.register(
     Commands.literal("stats").executes((c) => {
       KDAMenu.OpenMenu(c.source.player, "main", { sort: 0 });
       return 1;
-    })
+    }),
   );
 
   event.register(
@@ -54,9 +54,10 @@ ServerEvents.commandRegistry((event) => {
       .executes((c) => kills(c.source.player, c.source.player))
       .then(
         Commands.argument("target", Arguments.PLAYER.create(event)).executes(
-          (c) => kills(c.source.player, Arguments.PLAYER.getResult(c, "target"))
-        )
-      )
+          (c) =>
+            kills(c.source.player, Arguments.PLAYER.getResult(c, "target")),
+        ),
+      ),
   );
 
   event.register(
@@ -65,9 +66,9 @@ ServerEvents.commandRegistry((event) => {
       .then(
         Commands.argument("target", Arguments.PLAYER.create(event)).executes(
           (c) =>
-            deaths(c.source.player, Arguments.PLAYER.getResult(c, "target"))
-        )
-      )
+            deaths(c.source.player, Arguments.PLAYER.getResult(c, "target")),
+        ),
+      ),
   );
 
   /**
@@ -177,51 +178,53 @@ function getPlayerItemComponent(player) {
     },
   ];
 
-  let favSpell = getFavouriteSpell(player.kill_history);
-  if (favSpell) {
-    if (favSpell.spell.name) {
-      lore.push(
-        {
+  if (Platform.isLoaded("arsnouveau")) {
+    let favSpell = getFavouriteSpell(player.kill_history);
+    if (favSpell) {
+      if (favSpell.spell.name) {
+        lore.push(
+          {
+            text: "Favourite Spell: ",
+            italic: false,
+            color: "gray",
+            extra: [
+              { text: favSpell.spell.name, color: "aqua" },
+              { text: " (" },
+              { text: `${favSpell.count}`, color: "green" },
+              { text: " uses)", color: "gray" },
+            ],
+          },
+          {
+            text: "  Glyphs: ", // Indented
+            italic: false,
+            color: "gray",
+            // flattenTextComponent(colorSpellGlyphs(...)) returns a string with pre-applied color codes
+            extra: [
+              {
+                text: `${flattenTextComponent(
+                  colorSpellGlyphs(favSpell.spell.recipe),
+                )}`,
+              },
+            ],
+          },
+        );
+      } else {
+        // Fallback if spell name isn't available
+        lore.push({
           text: "Favourite Spell: ",
           italic: false,
           color: "gray",
           extra: [
-            { text: favSpell.spell.name, color: "aqua" },
+            {
+              text: `${favSpell.spell.glyphs}`, // Glyphs in Dark Aqua (or as per flattenTextComponent if used)
+              color: "dark_aqua", // Assuming glyphs string doesn't have own colors here
+            },
             { text: " (" },
             { text: `${favSpell.count}`, color: "green" },
             { text: " uses)", color: "gray" },
           ],
-        },
-        {
-          text: "  Glyphs: ", // Indented
-          italic: false,
-          color: "gray",
-          // flattenTextComponent(colorSpellGlyphs(...)) returns a string with pre-applied color codes
-          extra: [
-            {
-              text: `${flattenTextComponent(
-                colorSpellGlyphs(favSpell.spell.recipe)
-              )}`,
-            },
-          ],
-        }
-      );
-    } else {
-      // Fallback if spell name isn't available
-      lore.push({
-        text: "Favourite Spell: ",
-        italic: false,
-        color: "gray",
-        extra: [
-          {
-            text: `${favSpell.spell.glyphs}`, // Glyphs in Dark Aqua (or as per flattenTextComponent if used)
-            color: "dark_aqua", // Assuming glyphs string doesn't have own colors here
-          },
-          { text: " (" },
-          { text: `${favSpell.count}`, color: "green" },
-          { text: " uses)", color: "gray" },
-        ],
-      });
+        });
+      }
     }
   }
 
@@ -306,14 +309,14 @@ function getNemesis(player) {
       )
         return acc;
       let kills = p.kill_history.filter(
-        (k) => k && k.uuid === player.uuid
+        (k) => k && k.uuid === player.uuid,
       ).length;
       if (kills > acc.kills) {
         return { player: p, kills: kills };
       }
       return acc;
     },
-    { player: null, kills: 0 }
+    { player: null, kills: 0 },
   );
 
   if (!nemesis.player) {
@@ -425,7 +428,7 @@ let KDAMenu = new Menu(
       load: function (menu, data) {
         let sortInd = data?.sort || 0;
         let leaderboard = getLeaderboard().sort(
-          COMBAT_LEADERBOARD_SORTING_OPTIONS[sortInd].sort
+          COMBAT_LEADERBOARD_SORTING_OPTIONS[sortInd].sort,
         );
         // TODO perhaps make a helper function to paginate
         leaderboard.slice(0, 4 * MAX_COLUMNS).forEach((statPlayer, i) => {
@@ -459,12 +462,12 @@ let KDAMenu = new Menu(
                   text: `${index === sortInd ? "§a⋙ " : "§7"}${option.display}`,
                 },
               ];
-            })
-          )}]`
+            }),
+          )}]`,
         );
 
         menu.gui.slot(4, 4, (slot) => {
-          (slot.item = sortItem),
+          ((slot.item = sortItem),
             (slot.leftClicked = (e) => {
               sortInd++;
               if (sortInd >= COMBAT_LEADERBOARD_SORTING_OPTIONS.length) {
@@ -478,7 +481,7 @@ let KDAMenu = new Menu(
                 sortInd = COMBAT_LEADERBOARD_SORTING_OPTIONS.length - 1;
               }
               menu.ShowPage("main", { sort: sortInd });
-            });
+            }));
         });
       },
     },
@@ -500,18 +503,18 @@ let KDAMenu = new Menu(
         });
 
         menu.gui.slot(0, 4, (slot) => {
-          (slot.item = createMenuButton({
+          ((slot.item = createMenuButton({
             title: [{ text: "Back", italic: false }],
             description: ["Return to the leaderboard"],
             itemID: "minecraft:oak_sign",
           })),
             (slot.leftClicked = (e) => {
               menu.ShowPage("main", { sort: data.sort });
-            });
+            }));
         });
 
         menu.gui.slot(0, 0, (slot) => {
-          (slot.item = createMenuButton({
+          ((slot.item = createMenuButton({
             title: [{ text: "Kill History", italic: false, color: "yellow" }],
             description: ["View kill history"],
             itemID: "minecraft:iron_sword",
@@ -522,10 +525,10 @@ let KDAMenu = new Menu(
                 sort: data.sort,
                 viewType: "heads",
               });
-            });
+            }));
         });
         menu.gui.slot(1, 0, (slot) => {
-          (slot.item = createMenuButton({
+          ((slot.item = createMenuButton({
             title: [{ text: "Death History", italic: false, color: "red" }],
             description: ["View death history"],
             itemID: "minecraft:skeleton_skull",
@@ -536,7 +539,7 @@ let KDAMenu = new Menu(
                 sort: data.sort,
                 viewType: "heads",
               });
-            });
+            }));
         });
         // TODO
         // menu.gui.slot(2, 0, (slot) => {
@@ -599,14 +602,14 @@ let KDAMenu = new Menu(
                         kill.weapon.components
                           ? `${kill.weapon.components}`
                           : ""
-                      }`
+                      }`,
                     );
             });
           }
         }
 
         menu.gui.slot(0, 4, (slot) => {
-          (slot.item = createMenuButton({
+          ((slot.item = createMenuButton({
             title: [{ text: "Back", italic: false }],
             description: ["Return to player stats"],
             itemID: "minecraft:oak_sign",
@@ -616,11 +619,11 @@ let KDAMenu = new Menu(
                 target: statPlayer,
                 sort: data.sort,
               });
-            });
+            }));
         });
 
         menu.gui.slot(4, 4, (slot) => {
-          (slot.item = createMenuButton({
+          ((slot.item = createMenuButton({
             title: "§aKill Icon",
             itemID: "minecraft:arrow",
             description:
@@ -636,11 +639,11 @@ let KDAMenu = new Menu(
                 viewType: viewType,
                 page: currentPage,
               });
-            });
+            }));
         });
 
         menu.gui.slot(5, 4, (slot) => {
-          (slot.item = createMenuButton({
+          ((slot.item = createMenuButton({
             title: `§aNext Page (${currentPage + 1}/${pages == 0 ? 1 : pages})`,
             itemID: "minecraft:arrow",
             description: ["View next page of kills"],
@@ -656,11 +659,11 @@ let KDAMenu = new Menu(
                 viewType: viewType,
                 page: currentPage,
               });
-            });
+            }));
         });
 
         menu.gui.slot(3, 4, (slot) => {
-          (slot.item = createMenuButton({
+          ((slot.item = createMenuButton({
             title: `§aPrevious Page (${currentPage + 1}/${
               pages == 0 ? 1 : pages
             })`,
@@ -678,7 +681,7 @@ let KDAMenu = new Menu(
                 viewType: viewType,
                 page: currentPage,
               });
-            });
+            }));
         });
       },
     },
@@ -725,7 +728,7 @@ let KDAMenu = new Menu(
         }
 
         menu.gui.slot(0, 4, (slot) => {
-          (slot.item = createMenuButton({
+          ((slot.item = createMenuButton({
             title: [{ text: "Back", italic: false }],
             description: ["Return to player stats"],
             itemID: "minecraft:oak_sign",
@@ -735,7 +738,7 @@ let KDAMenu = new Menu(
                 target: statPlayer,
                 sort: data.sort,
               });
-            });
+            }));
         });
 
         // menu.gui.slot(4, 4, slot => {
@@ -751,7 +754,7 @@ let KDAMenu = new Menu(
         // })
 
         menu.gui.slot(5, 4, (slot) => {
-          (slot.item = createMenuButton({
+          ((slot.item = createMenuButton({
             title: `§aNext Page (${currentPage + 1}/${pages == 0 ? 1 : pages})`,
             itemID: "minecraft:arrow",
             description: ["View next page of deaths"],
@@ -767,11 +770,11 @@ let KDAMenu = new Menu(
                 viewType: viewType,
                 page: currentPage,
               });
-            });
+            }));
         });
 
         menu.gui.slot(3, 4, (slot) => {
-          (slot.item = createMenuButton({
+          ((slot.item = createMenuButton({
             title: `§aPrevious Page (${currentPage + 1}/${
               pages == 0 ? 1 : pages
             })`,
@@ -789,7 +792,7 @@ let KDAMenu = new Menu(
                 viewType: viewType,
                 page: currentPage,
               });
-            });
+            }));
         });
       },
     },
@@ -797,5 +800,5 @@ let KDAMenu = new Menu(
       name: "advancements",
       load: advancementMenu,
     },
-  ]
+  ],
 );
