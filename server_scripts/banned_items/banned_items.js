@@ -7,10 +7,10 @@ PlayerEvents.inventoryChanged((event) => {
   if (!FEATURE_BANNED_ITEMS) return;
 
   let item = event.getItem();
-  let player = event.server.getPlayer(event.player.name.getString());
+  let player = event.server.getPlayer(event.player.getStringUuid());
   if (!player) return;
   let foundBannedItem = BANNED_ITEMS.find(
-    (bannedItem) => bannedItem.id === item.id
+    (bannedItem) => bannedItem.id === item.id,
   );
   if (!foundBannedItem) return;
 
@@ -23,7 +23,7 @@ PlayerEvents.inventoryChanged((event) => {
   event.server.tell(
     `§4${player.name.getString()}, you are not allowed to have §f${
       foundBannedItem.display
-    }§4!`
+    }§4!`,
   );
 });
 
@@ -45,6 +45,6 @@ ServerEvents.commandRegistry((event) => {
         }
       }
       return 1;
-    })
+    }),
   );
 });
